@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  #SERVICIO DE PERSISTENCIA: PostgreSQL 16
+  #Provee la base de datos relacional para el almacenamiento de usuarios, menús y reservas
+  db:
+    image: postgres:16
+    container_name: base_datos_restaurante
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: reservas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - base_datos_nueva:/var/lib/postgresql/data
+
+  #SERVICIO DE IDENTIDAD: Keycloak
+  #Actúa como el proveedor de identidad externo para la gestión de JWT y roles
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: auth_restaurante
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+  #SERVICIO DE LÓGICA DE NEGOCIO: API REST (.NET 9)
+  #Aplicación principal que integra la base de datos y el servicio de autenticación
+  api:
+    build:
+      context: ./RestauranteApi 
+      dockerfile: Dockerfile
+    container_name: api_restaurante
+    ports:
+      - "5085:8080" 
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      #Configuración de conexión utilizando el DNS interno de Docker (Host=db)
+      - ConnectionStrings__DefaultConnection=Host=db;Database=reservas_db;Username=admin;Password=password123
+      #Configuración de autoridad JWT apuntando al contenedor de Keycloak
+      - Jwt__Authority=http://keycloak:8080/realms/RestaurantesRealm
+      - Jwt__Audience=account
+    depends_on:
+      - db
+      - keycloak
+
+#VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
+volumes:
+  base_datos_nueva:
+  keycloak_data:
