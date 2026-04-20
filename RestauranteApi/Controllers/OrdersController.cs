@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RestaurantesApi.Data;
 using RestaurantesApi.Models;
+using RestaurantesApi.Repositories; // <-- Nueva referencia
 
 namespace RestaurantesApi.Controllers
 {
@@ -9,23 +9,24 @@ namespace RestaurantesApi.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        // Inyectamos la Interfaz
+        private readonly IOrderRepository _repository; 
 
-        public OrdersController(AppDbContext context)
+        public OrdersController(IOrderRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpPost]
         [Authorize] 
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
-
+            // Las validaciones de negocio se quedan en el controller
             if (order.TotalAmount <= 0) 
                 return BadRequest("El monto del pedido debe ser mayor a cero, compa.");
 
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            // Delegamos el guardado a la base de datos
+            await _repository.CreateAsync(order); 
 
             return CreatedAtAction(nameof(GetOrderDetails), new { id = order.Id }, order);
         }
@@ -34,7 +35,8 @@ namespace RestaurantesApi.Controllers
         [Authorize] 
         public async Task<ActionResult<Order>> GetOrderDetails(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            // Delegamos la búsqueda
+            var order = await _repository.GetByIdAsync(id); 
             
             if (order == null) return NotFound("Mae, no encontramos ese pedido.");
 

@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RestaurantesApi.Data;
 using RestaurantesApi.Models;
+using RestaurantesApi.Repositories; // ¡Importante agregar esto!
 
 namespace RestaurantesApi.Controllers
 {
@@ -10,70 +9,62 @@ namespace RestaurantesApi.Controllers
     [ApiController]
     public class MenusController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IMenuRepository _repository;
 
-        public MenusController(AppDbContext context)
+        // Inyectamos la Interfaz, no el AppDbContext
+        public MenusController(IMenuRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        //Creación de platillos protegida: Solo usuarios con rol de "admin" pueden ejecutar esta acción
         [HttpPost]
         [Authorize(Roles = "admin")] 
         public async Task<ActionResult<Menu>> CreateMenu(Menu menu)
         {
-            //Validación de integridad referencial: Verifica que el restaurante asociado exista
-            var restaurantExists = await _context.Restaurants.AnyAsync(r => r.Id == menu.RestaurantId);
+            var restaurantExists = await _repository.RestaurantExistsAsync(menu.RestaurantId);
             if (!restaurantExists) return BadRequest("El restaurante no existe.");
 
-            _context.Menus.Add(menu);
-            await _context.SaveChangesAsync();
+            await _repository.CreateAsync(menu);
 
             return CreatedAtAction(nameof(GetMenuDetails), new { id = menu.Id }, menu);
         }
 
-        //Endpoint público: Permite a cualquier usuario autenticado consultar detalles de un platillo
         [HttpGet("{id}")]
         public async Task<ActionResult<Menu>> GetMenuDetails(int id)
         {
-            var menu = await _context.Menus.FindAsync(id);
+            var menu = await _repository.GetByIdAsync(id);
             if (menu == null) return NotFound("Ese plato no se encuentra en el menú.");
             
             return menu;
         }
 
-        //Actualización de recursos: Implementa lógica de concurrencia y restricción por rol administrativo
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateMenu(int id, Menu menu)
         {
             if (id != menu.Id) return BadRequest("El ID de la ruta no coincide con el del platillo.");
 
-            _context.Entry(menu).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(menu);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
-                if (!_context.Menus.Any(e => e.Id == id)) return NotFound();
+                if (!await _repository.MenuExistsAsync(id)) return NotFound();
                 throw;
             }
 
             return NoContent();
         }
 
-        //Eliminación física: Acción restringida a administradores para la gestión del catálogo
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteMenu(int id)
         {
-            var menu = await _context.Menus.FindAsync(id);
+            var menu = await _repository.GetByIdAsync(id);
             if (menu == null) return NotFound();
 
-            _context.Menus.Remove(menu);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteAsync(id);
 
             return NoContent();
         }

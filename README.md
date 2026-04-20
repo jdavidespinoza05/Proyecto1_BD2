@@ -6,7 +6,7 @@ Profesor: Kenneth Obando Rodríguez
 
 Fecha: 28 de marzo, 2026
 
-
+ 
 
 * Descripción del Proyecto
 Esta es una API REST desarrollada en .NET 9 diseñada para la gestión interna de reservas y pedidos en restaurantes. El sistema implementa una arquitectura que incluye:

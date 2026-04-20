@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using RestaurantesApi.Data;
 using RestaurantesApi.Models; 
+using RestaurantesApi.Repositories; // <-- Nueva referencia
 
 namespace RestaurantesApi.Controllers;
 
@@ -13,18 +12,22 @@ namespace RestaurantesApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly AppDbContext _context; 
+    
+    // CAMBIO 1: Adiós AppDbContext, hola IUsuarioRepository
+    private readonly IUsuarioRepository _repository; 
+    
     private readonly string _keycloakClientSecret = "XKRaNAwDC4qwD8NLL9l2GWdHd9JgjQ3w"; 
 
-    public AuthController(IHttpClientFactory httpClientFactory, AppDbContext context)
+    public AuthController(IHttpClientFactory httpClientFactory, IUsuarioRepository repository)
     {
         _httpClientFactory = httpClientFactory;
-        _context = context;
+        _repository = repository;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        // Todo esto se queda exactamente igual porque es lógica de Keycloak
         if (request == null || string.IsNullOrEmpty(request.Username))
             return BadRequest(new { mensaje = "Hacen falta datos." });
 
@@ -39,7 +42,6 @@ public class AuthController : ControllerBase
             new KeyValuePair<string, string>("password", request.Password)
         });
 
-        // CORRECCIÓN: Se cambia localhost por el nombre del servicio 'keycloak'
         var response = await client.PostAsync("http://keycloak:8080/realms/RestaurantesRealm/protocol/openid-connect/token", keycloakData);
         var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -52,9 +54,11 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.Correo == request.Email);
-        if (usuarioExiste) return BadRequest(new { mensaje = "El correo ya está registrado." });
+        // CAMBIO 2: Verificamos si existe usando el repositorio en lugar de _context.Usuarios.AnyAsync
+        var usuarioExistente = await _repository.GetByEmailAsync(request.Email);
+        if (usuarioExistente != null) return BadRequest(new { mensaje = "El correo ya está registrado." });
 
+        // --- INICIO BLOQUE KEYCLOAK (Intacto) ---
         var client = _httpClientFactory.CreateClient();
 
         var tokenData = new FormUrlEncodedContent(new[]
@@ -64,7 +68,6 @@ public class AuthController : ControllerBase
             new KeyValuePair<string, string>("grant_type", "client_credentials")
         });
 
-        // CORRECCIÓN: Se cambia localhost por el nombre del servicio 'keycloak'
         var tokenResponse = await client.PostAsync("http://keycloak:8080/realms/RestaurantesRealm/protocol/openid-connect/token", tokenData);
         if (!tokenResponse.IsSuccessStatusCode){
             var contenidoError = await tokenResponse.Content.ReadAsStringAsync();
@@ -91,7 +94,6 @@ public class AuthController : ControllerBase
         var jsonContent = new StringContent(JsonSerializer.Serialize(nuevoUsuarioKeycloak), Encoding.UTF8, "application/json");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         
-        // CORRECCIÓN: Se cambia localhost por el nombre del servicio 'keycloak' para la API Admin
         var createKcResponse = await client.PostAsync("http://keycloak:8080/admin/realms/RestaurantesRealm/users", jsonContent);
 
         if (!createKcResponse.IsSuccessStatusCode)
@@ -101,6 +103,7 @@ public class AuthController : ControllerBase
         }
 
         var keycloakUserId = createKcResponse.Headers.Location?.Segments.Last();
+        // --- FIN BLOQUE KEYCLOAK ---
 
         try 
         {
@@ -111,8 +114,8 @@ public class AuthController : ControllerBase
                 Rol = string.IsNullOrWhiteSpace(request.Rol) ? "cliente" : request.Rol.ToLower()
             };
 
-            _context.Usuarios.Add(nuevoUsuarioDb);
-            await _context.SaveChangesAsync();
+            // CAMBIO 3: Guardamos en la BD local delegando al repositorio
+            await _repository.CreateAsync(nuevoUsuarioDb);
 
             return Ok(new { 
                 mensaje = "Usuario creado.", 

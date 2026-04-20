@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
+using RestaurantesApi.Repositories; // <-- ¡NUEVO! Importamos tus repositorios
 
 // PASO 1: Limpiar el mapeo automático de claims para que .NET use nombres simples
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -100,9 +101,43 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
-// Configuración de PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// =======================================================================
+// INICIO DEL SWITCH DE BASES DE DATOS (NUEVA ARQUITECTURA)
+// =======================================================================
+
+// Leemos la variable desde el appsettings.json (si no existe, usa Postgres por defecto)
+var dbEngine = builder.Configuration["DatabaseEngine"] ?? "Postgres";
+
+if (dbEngine.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
+{
+    // 1. Configuramos el DbContext de Entity Framework como siempre
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    // 2. Le decimos a .NET que entregue los repositorios de PostgreSQL cuando un Controller pida una Interfaz
+    builder.Services.AddScoped<IMenuRepository, PostgresMenuRepository>();
+    builder.Services.AddScoped<IOrderRepository, PostgresOrderRepository>();
+    builder.Services.AddScoped<IReservationRepository, PostgresReservationRepository>();
+    builder.Services.AddScoped<IRestaurantRepository, PostgresRestaurantRepository>();
+    builder.Services.AddScoped<IUsuarioRepository, PostgresUsuarioRepository>();
+}
+else if (dbEngine.Equals("Mongo", StringComparison.OrdinalIgnoreCase))
+{
+    // 1. Aquí tu compañero conectará el driver de MongoDB en los próximos días
+
+    // 2. Le decimos a .NET que entregue los repositorios de MongoDB
+    builder.Services.AddScoped<IMenuRepository, MongoMenuRepository>();
+    builder.Services.AddScoped<IOrderRepository, MongoOrderRepository>();
+    builder.Services.AddScoped<IReservationRepository, MongoReservationRepository>();
+    builder.Services.AddScoped<IRestaurantRepository, MongoRestaurantRepository>();
+    builder.Services.AddScoped<IUsuarioRepository, MongoUsuarioRepository>();
+}
+
+// =======================================================================
+// FIN DEL SWITCH DE BASES DE DATOS
+// =======================================================================
+
 
 var app = builder.Build();
 
