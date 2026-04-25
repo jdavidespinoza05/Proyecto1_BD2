@@ -14,6 +14,8 @@ services:
       - "5432:5432"
     volumes:
       - base_datos_nueva:/var/lib/postgresql/data
+    networks:
+      - restaurante_net
 
   #SERVICIO DE IDENTIDAD: Keycloak
   #Actúa como el proveedor de identidad externo para la gestión de JWT y roles
@@ -28,6 +30,8 @@ services:
       - "8080:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
+    networks:
+      - restaurante_net
 
   #SERVICIO DE LÓGICA DE NEGOCIO: API REST (.NET 9)
   #Aplicación principal que integra la base de datos y el servicio de autenticación
@@ -48,8 +52,29 @@ services:
     depends_on:
       - db
       - keycloak
+    networks:
+      - restaurante_net
+
+# CLÚSTER MONGODB  
+# El servidor de configuración guarda los metadatos y el mapa del sharding
+  mongo-config:
+    image: mongo:7.0
+    container_name: mongo_config
+    command: mongod --configsvr --replSet configRS --port 27019 --bind_ip_all
+    ports:
+      - "27019:27019"
+    volumes:
+      - mongo_config_data:/data/configdb
+    networks:
+      - restaurante_net
+
 
 #VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
 volumes:
   base_datos_nueva:
   keycloak_data:
+  mongo_config_data:
+
+networks:
+  restaurante_net:
+    driver: bridge
