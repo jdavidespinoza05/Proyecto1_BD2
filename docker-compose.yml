@@ -107,6 +107,22 @@ services:
     networks:
       - restaurante_net
 
+# Router (mongos)
+  mongo-router:
+    image: mongo:7.0
+    container_name: mongo_router
+    # Aquí le decimos al recepcionista dónde está el directorio (Config Server)
+    command: mongos --configdb configRS/mongo-config:27019 --bind_ip_all
+    ports:
+      - "27017:27017" # El puerto estándar de Mongo, para que la API se conecte fácil
+    networks:
+      - restaurante_net
+    depends_on:
+      - mongo-config
+      - mongo-shard-1a
+      - mongo-shard-1b
+      - mongo-shard-1c
+
 #VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
 volumes:
   base_datos_nueva:
