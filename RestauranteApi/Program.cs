@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
-using RestaurantesApi.Repositories; // <-- ¡NUEVO! Importamos tus repositorios
+using RestaurantesApi.Repositories; // <-- Importamos tus repositorios
 
 // PASO 1: Limpiar el mapeo automático de claims para que .NET use nombres simples
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -101,6 +101,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
+// =======================================================================
+// INICIO CONFIGURACIÓN REDIS (PASO 3)
+// =======================================================================
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    // Lee la conexión que pusiste en el appsettings.json
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName = "RestaurantesApi_"; // Un prefijo para no mezclar datos en memoria
+});
+// =======================================================================
+// FIN CONFIGURACIÓN REDIS
+// =======================================================================
 
 // =======================================================================
 // INICIO DEL SWITCH DE BASES DE DATOS (NUEVA ARQUITECTURA)
@@ -137,7 +149,6 @@ else if (dbEngine.Equals("Mongo", StringComparison.OrdinalIgnoreCase))
 // =======================================================================
 // FIN DEL SWITCH DE BASES DE DATOS
 // =======================================================================
-
 
 var app = builder.Build();
 
