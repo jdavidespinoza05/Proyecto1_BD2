@@ -33,6 +33,16 @@ services:
     networks:
       - restaurante_net
 
+  #SERVICIO DE CACHÉ: Redis
+  #Almacenamiento en memoria para acelerar respuestas frecuentes de la API
+  redis:
+    image: redis:latest
+    container_name: cache_restaurante
+    ports:
+      - "6379:6379"
+    networks:
+      - restaurante_net
+
   #SERVICIO DE LÓGICA DE NEGOCIO: API REST (.NET 9)
   #Aplicación principal que integra la base de datos y el servicio de autenticación
   api:
@@ -49,6 +59,7 @@ services:
       #Configuración de autoridad JWT apuntando al contenedor de Keycloak
       - Jwt__Authority=http://keycloak:8080/realms/RestaurantesRealm
       - Jwt__Audience=account
+      - ConnectionStrings__RedisConnection=redis:6379
     depends_on:
       - db
       - keycloak
