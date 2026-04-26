@@ -55,7 +55,8 @@ services:
     networks:
       - restaurante_net
 
-# CLÚSTER MONGODB  
+# CLÚSTER MONGODB ------------------------------------------ 
+# Config server
 # El servidor de configuración guarda los metadatos y el mapa del sharding
   mongo-config:
     image: mongo:7.0
@@ -68,12 +69,52 @@ services:
     networks:
       - restaurante_net
 
+# Shard (replica set)
+# Nodo 1 (Primario)
+  mongo-shard-1a:
+    image: mongo:7.0
+    container_name: mongo_shard_1a
+    # El comando --shardsvr le dice que es un trabajador de almacenamiento
+    command: mongod --shardsvr --replSet shard1RS --port 27018 --bind_ip_all
+    ports:
+      - "27118:27018"
+    volumes:
+      - mongo_shard_1a_data:/data/db
+    networks:
+      - restaurante_net
+
+  # Nodo 2 (Secundario)
+  mongo-shard-1b:
+    image: mongo:7.0
+    container_name: mongo_shard_1b
+    command: mongod --shardsvr --replSet shard1RS --port 27018 --bind_ip_all
+    ports:
+      - "27218:27018"
+    volumes:
+      - mongo_shard_1b_data:/data/db
+    networks:
+      - restaurante_net
+
+  # Nodo 3 (Secundario)
+  mongo-shard-1c:
+    image: mongo:7.0
+    container_name: mongo_shard_1c
+    command: mongod --shardsvr --replSet shard1RS --port 27018 --bind_ip_all
+    ports:
+      - "27318:27018"
+    volumes:
+      - mongo_shard_1c_data:/data/db
+    networks:
+      - restaurante_net
 
 #VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
 volumes:
   base_datos_nueva:
   keycloak_data:
   mongo_config_data:
+  mongo_shard_1a_data:
+  mongo_shard_1b_data:
+  mongo_shard_1c_data:
 
 networks:
   restaurante_net:
