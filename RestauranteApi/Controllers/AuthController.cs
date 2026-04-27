@@ -16,7 +16,7 @@ public class AuthController : ControllerBase
     // CAMBIO 1: Adiós AppDbContext, hola IUsuarioRepository
     private readonly IUsuarioRepository _repository; 
     
-    private readonly string _keycloakClientSecret = "XKRaNAwDC4qwD8NLL9l2GWdHd9JgjQ3w"; 
+    private readonly string _keycloakClientSecret = "zK4YVM7kzzJmZEAv6OWEQZR9GLkL1AFM"; 
 
     public AuthController(IHttpClientFactory httpClientFactory, IUsuarioRepository repository)
     {

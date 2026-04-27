@@ -22,14 +22,15 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: auth_restaurante
-    command: start-dev
+    command: start-dev --import-realm # <-- Agregamos esto para que importe el JSON
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
     volumes:
-      - keycloak_data:/opt/keycloak/data
+      - ./keycloak_data:/opt/keycloak/data # Carpeta local para la base de datos interna
+      - ./keycloak_import:/opt/keycloak/data/import # Carpeta para el archivo JSON
     networks:
       - restaurante_net
 
