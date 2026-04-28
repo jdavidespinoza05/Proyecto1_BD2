@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
-using RestaurantesApi.Repositories; // <-- Importamos tus repositorios
+using RestaurantesApi.Repositories; 
 
 // PASO 1: Limpiar el mapeo automático de claims para que .NET use nombres simples
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -136,7 +136,21 @@ if (dbEngine.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
 }
 else if (dbEngine.Equals("Mongo", StringComparison.OrdinalIgnoreCase))
 {
-    // 1. Aquí tu compañero conectará el driver de MongoDB en los próximos días
+    // 1. Conectamos el driver oficial de MongoDB
+    builder.Services.AddSingleton<MongoDB.Driver.IMongoClient>(sp => 
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        // Busca la variable en appsettings, si no la encuentra usa localhost
+        var connectionString = configuration.GetConnectionString("MongoConnection") ?? "mongodb://localhost:27017";
+        return new MongoDB.Driver.MongoClient(connectionString);
+    });
+
+    // Registramos la base de datos específica ("reservas_db")
+    builder.Services.AddScoped(sp => 
+    {
+        var client = sp.GetRequiredService<MongoDB.Driver.IMongoClient>();
+        return client.GetDatabase("reservas_db");
+    });
 
     // 2. Le decimos a .NET que entregue los repositorios de MongoDB
     builder.Services.AddScoped<IMenuRepository, MongoMenuRepository>();

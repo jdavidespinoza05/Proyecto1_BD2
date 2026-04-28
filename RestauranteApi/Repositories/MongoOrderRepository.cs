@@ -1,17 +1,29 @@
+using MongoDB.Driver;
 using RestaurantesApi.Models;
 
 namespace RestaurantesApi.Repositories
 {
     public class MongoOrderRepository : IOrderRepository
     {
-        public Task<Order> CreateAsync(Order order)
+        private readonly IMongoCollection<Order> _coleccion;
+
+        public MongoOrderRepository(IMongoDatabase database)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Conecta con la "tabla" (colección) de órdenes/pedidos en Mongo
+            _coleccion = database.GetCollection<Order>("orders");
         }
 
-        public Task<Order?> GetByIdAsync(int id)
+        public async Task<Order> CreateAsync(Order order)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Inserta la orden en la base de datos
+            await _coleccion.InsertOneAsync(order);
+            return order; // Retornamos el objeto con sus datos (como pide la interfaz)
+        }
+
+        public async Task<Order?> GetByIdAsync(int id)
+        {
+            // Busca la primera orden que coincida con el ID
+            return await _coleccion.Find(o => o.Id == id).FirstOrDefaultAsync();
         }
     }
 }
