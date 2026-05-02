@@ -8,7 +8,7 @@ using RestaurantesApi.Repositories; // <-- Nueva referencia
 namespace RestaurantesApi.Controllers;
 
 [ApiController]
-[Route("auth")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
