@@ -51,9 +51,11 @@ services:
     build:
       context: ./RestauranteApi 
       dockerfile: Dockerfile
-    container_name: api_restaurante
-    ports:
-      - "5085:8080" 
+    #container_name: api_restaurante
+    deploy:
+      replicas: 3
+    #ports:
+      #- "5085:8080" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DatabaseEngine=Mongo
