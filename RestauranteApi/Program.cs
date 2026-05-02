@@ -166,6 +166,22 @@ else if (dbEngine.Equals("Mongo", StringComparison.OrdinalIgnoreCase))
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.Migrate(); 
+        Console.WriteLine("--> Tablas de Postgres creadas con éxito");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"--> Error creando tablas: {ex.Message}");
+    }
+}
+
+
 // Middlewares de seguridad: El orden es vital
 app.UseAuthentication(); 
 app.UseAuthorization();  
