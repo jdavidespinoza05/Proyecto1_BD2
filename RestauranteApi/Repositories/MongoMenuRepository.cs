@@ -1,39 +1,55 @@
+using MongoDB.Driver;
 using RestaurantesApi.Models;
 
 namespace RestaurantesApi.Repositories
 {
     public class MongoMenuRepository : IMenuRepository
     {
-        // Tu compañero inyectará aquí el driver de MongoDB después
+        private readonly IMongoCollection<Menu> _coleccion;
+        private readonly IMongoCollection<Restaurant> _restaurantesColeccion; // Para validar si el restaurante existe
 
-        public Task<bool> RestaurantExistsAsync(int restaurantId)
+        public MongoMenuRepository(IMongoDatabase database)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Conecta con las colecciones en Mongo
+            _coleccion = database.GetCollection<Menu>("menus");
+            _restaurantesColeccion = database.GetCollection<Restaurant>("restaurants");
         }
 
-        public Task<Menu> CreateAsync(Menu menu)
+        public async Task<bool> RestaurantExistsAsync(int restaurantId)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Busca si existe al menos un restaurante con ese ID
+            return await _restaurantesColeccion.Find(r => r.Id == restaurantId).AnyAsync();
         }
 
-        public Task<Menu?> GetByIdAsync(int id)
+        public async Task<Menu> CreateAsync(Menu menu)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Inserta el menú en la base de datos
+            await _coleccion.InsertOneAsync(menu);
+            return menu; // Retornamos el objeto porque la interfaz pide Task<Menu>
         }
 
-        public Task UpdateAsync(Menu menu)
+        public async Task<Menu?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Busca el primer menú que coincida con el ID
+            return await _coleccion.Find(m => m.Id == id).FirstOrDefaultAsync();
         }
 
-        public Task<bool> MenuExistsAsync(int id)
+        public async Task UpdateAsync(Menu menu)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Reemplaza todo el documento del menú basándose en su ID
+            await _coleccion.ReplaceOneAsync(m => m.Id == menu.Id, menu);
         }
 
-        public Task DeleteAsync(int id)
+        public async Task<bool> MenuExistsAsync(int id)
         {
-            throw new NotImplementedException("Falta implementar MongoDB");
+            // Verifica si algún menú tiene este ID
+            return await _coleccion.Find(m => m.Id == id).AnyAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            // Elimina el menú basándose en su ID
+            await _coleccion.DeleteOneAsync(m => m.Id == id);
         }
     }
 }
