@@ -154,6 +154,22 @@ services:
     networks:
       - restaurante_net
   
+# SERVICIO DE BÚSQUEDA: ElasticSearch
+  # Motor de búsqueda inteligente y texto completo para el catálogo de productos
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: buscador_restaurante
+    environment:
+      - discovery.type=single-node # Modo desarrollo: funciona sin necesitar un clúster entero
+      - xpack.security.enabled=false # Desactiva HTTPS y autenticación compleja para desarrollo local
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Límite estricto de memoria RAM (512MB)
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - restaurante_net
+
 #VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
 volumes:
   base_datos_nueva:
