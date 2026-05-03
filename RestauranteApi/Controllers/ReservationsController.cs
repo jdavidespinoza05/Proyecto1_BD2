@@ -23,7 +23,7 @@ namespace RestaurantesApi.Controllers
         {
             // La lógica de negocio se mantiene
             if (res.ReservationDate < DateTime.Now) 
-                return BadRequest("No puede reservar en el pasado, compa.");
+                return BadRequest("No puede reservar en el pasado.");
 
             // Delegamos a la base de datos
             await _repository.CreateAsync(res); 

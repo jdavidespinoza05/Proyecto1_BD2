@@ -58,7 +58,7 @@ services:
       #- "5085:8080" 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DatabaseEngine=Mongo
+      - DatabaseEngine=Postgres
       - ConnectionStrings__MongoConnection=mongodb://mongo-router:27017
       #Configuración de conexión utilizando el DNS interno de Docker (Host=db)
       - ConnectionStrings__DefaultConnection=Host=db;Database=reservas_db;Username=admin;Password=password123
