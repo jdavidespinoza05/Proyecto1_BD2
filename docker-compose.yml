@@ -66,10 +66,12 @@ services:
       - Jwt__Authority=http://keycloak:8080/realms/RestaurantesRealm
       - Jwt__Audience=account
       - ConnectionStrings__RedisConnection=redis:6379
+      - ConnectionStrings__ElasticConnection=http://elasticsearch:9200
     depends_on:
       - db
       - keycloak
       - mongo-router
+      - elasticsearch
     networks:
       - restaurante_net
 
@@ -178,6 +180,7 @@ volumes:
   mongo_shard_1a_data:
   mongo_shard_1b_data:
   mongo_shard_1c_data:
+  elasticsearch_data:
 
 networks:
   restaurante_net:
