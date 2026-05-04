@@ -7,6 +7,8 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
 using RestaurantesApi.Repositories; 
+using Elastic.Clients.Elasticsearch;
+using RestaurantesApi.Services;
 
 // PASO 1: Limpiar el mapeo automático de claims para que .NET use nombres simples
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -114,6 +116,18 @@ builder.Services.AddStackExchangeRedisCache(options =>
 // FIN CONFIGURACIÓN REDIS
 // =======================================================================
 
+// =======================================================================
+// INICIO CONFIGURACIÓN ELASTICSEARCH
+// =======================================================================
+var elasticUri = builder.Configuration.GetConnectionString("ElasticConnection") ?? "http://localhost:9200";
+
+// Configuramos las opciones para habilitar la depuración
+var settings = new ElasticsearchClientSettings(new Uri(elasticUri))
+    .EnableDebugMode(); 
+
+builder.Services.AddSingleton<ElasticsearchClient>(new ElasticsearchClient(settings));
+builder.Services.AddScoped<ISearchService, ElasticSearchService>();
+// =======================================================================
 // =======================================================================
 // INICIO DEL SWITCH DE BASES DE DATOS (NUEVA ARQUITECTURA)
 // =======================================================================
