@@ -44,6 +44,28 @@ jobs:
       - name: Descargar el código
         uses: actions/checkout@v4
 
+        # Levantamos la infraestructura para probarla
+      - name: Levantar contenedores para pruebas
+        run: |
+          docker-compose up -d
+          # Le damos un tiempo para que las bases de datos terminen de iniciar
+          sleep 30 
+
+      # Esta es su prueba de integración "estilo DevOps"
+      - name: Prueba de Integración - Conectividad API
+        run: |
+          # Verificamos si Nginx y la API responden un 200 OK
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/restaurants)
+          if [ $STATUS -ne 200 ]; then
+            echo "Error: La API o Nginx no están respondiendo correctamente (Status: $STATUS)"
+            exit 1
+          fi
+          echo "¡Integración exitosa! Nginx y API están comunicados."
+
+      - name: Apagar contenedores
+        if: always() # Esto asegura que se apaguen aunque la prueba falle
+        run: docker-compose down
+
       - name: Iniciar sesión en GitHub Container Registry
         uses: docker/login-action@v3
         with:
