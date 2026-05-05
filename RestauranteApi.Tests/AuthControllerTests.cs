@@ -1,27 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected;
 using System.Net;
-using System.Text.Json;
 using Xunit;
 using RestaurantesApi.Controllers;
-using RestaurantesApi.Data;
 using RestaurantesApi.Models;
+using RestaurantesApi.Repositories;
 
 namespace RestauranteApi.Tests
 {
     public class AuthControllerTests
     {
-        private AppDbContext GetDatabaseContext()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            return new AppDbContext(options);
-        }
-
-        // --- TRUCO: Simulador de respuestas HTTP ---
+        // --- TRUCO: Simulador de respuestas HTTP para Keycloak ---
         private Mock<IHttpClientFactory> CreateMockHttpClientFactory(HttpStatusCode statusCode, string content)
         {
             var handlerMock = new Mock<HttpMessageHandler>();
@@ -47,9 +37,10 @@ namespace RestauranteApi.Tests
         public async Task Login_ReturnsBadRequest_WhenUsernameEmpty()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            var mockFactory = new Mock<IHttpClientFactory>();
-            var controller = new AuthController(mockFactory.Object, db);
+            var mockRepo = new Mock<IUsuarioRepository>(); 
+            var mockFactory = new Mock<IHttpClientFactory>(); 
+            
+            var controller = new AuthController(mockFactory.Object, mockRepo.Object);
             var request = new LoginRequest { Username = "" };
 
             // Act
@@ -63,10 +54,11 @@ namespace RestauranteApi.Tests
         public async Task Login_ReturnsOk_WhenKeycloakSucceeds()
         {
             // Arrange
-            var db = GetDatabaseContext();
+            var mockRepo = new Mock<IUsuarioRepository>();
             var fakeToken = "{\"access_token\":\"token_de_mentira\"}";
             var mockFactory = CreateMockHttpClientFactory(HttpStatusCode.OK, fakeToken);
-            var controller = new AuthController(mockFactory.Object, db);
+            
+            var controller = new AuthController(mockFactory.Object, mockRepo.Object);
             var request = new LoginRequest { Username = "david", Password = "123" };
 
             // Act
@@ -81,12 +73,14 @@ namespace RestauranteApi.Tests
         public async Task Register_ReturnsBadRequest_WhenUserExistsInDb()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            db.Usuarios.Add(new Usuario { Id = 1, Correo = "yaexiste@mail.com", Nombre = "David" });
-            await db.SaveChangesAsync();
+            var mockRepo = new Mock<IUsuarioRepository>();
+            
+            // Usamos exactamente el nombre del método de tu controlador
+            mockRepo.Setup(repo => repo.GetByEmailAsync("yaexiste@mail.com"))
+                    .ReturnsAsync(new Usuario { Id = 1, Correo = "yaexiste@mail.com", Nombre = "David" });
 
             var mockFactory = new Mock<IHttpClientFactory>();
-            var controller = new AuthController(mockFactory.Object, db);
+            var controller = new AuthController(mockFactory.Object, mockRepo.Object);
             var request = new RegisterRequest { Email = "yaexiste@mail.com" };
 
             // Act
@@ -94,7 +88,6 @@ namespace RestauranteApi.Tests
 
             // Assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            // Verificamos que el mensaje sea el que puso tu compa
             Assert.Contains("El correo ya está registrado", badRequest.Value?.ToString());
         }
     }
