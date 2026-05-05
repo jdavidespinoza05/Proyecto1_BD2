@@ -25,9 +25,8 @@ jobs:
       - name: Compilar el proyecto
         run: dotnet build ./RestauranteApi/RestauranteApi.csproj --no-restore
 
-      # Ejecutar Pruebas Unitarias (Si David no ha hecho, esto fallará, podés comentarlo con #)
-      #- name: Ejecutar Pruebas Unitarias
-      #  run: dotnet test --no-build --verbosity normal
+      - name: Ejecutar Pruebas Unitarias
+        run: dotnet test ./RestauranteApi.Tests/RestauranteApi.Tests.csproj --verbosity normal
 
       # --- INICIO PRUEBAS DE INTEGRACIÓN ---
       - name: Levantar Infraestructura (Docker Compose)
