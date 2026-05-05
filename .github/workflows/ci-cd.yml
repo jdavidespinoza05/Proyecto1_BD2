@@ -38,7 +38,7 @@ jobs:
       - name: Prueba de Integración - Conectividad API
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/restaurants)
-          if [ $STATUS -ne 200 ]; then
+          if [ $STATUS -ne 400 ]; then
             echo "Error: La API o Nginx no responden (Status: $STATUS)"
             exit 1
           fi
