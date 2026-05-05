@@ -1,37 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
-using RestaurantesApi.Data;
 using RestaurantesApi.Controllers;
 using RestaurantesApi.Models;
+using RestaurantesApi.Repositories;
 using System.Threading.Tasks;
-using System;
 
 namespace RestauranteApi.Tests
 {
     public class MenusControllerTests
     {
-        private AppDbContext GetDatabaseContext()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            var databaseContext = new AppDbContext(options);
-            databaseContext.Database.EnsureCreated();
-            return databaseContext;
-        }
-
         [Fact]
         public async Task CreateMenu_ReturnsCreated_WhenRestaurantExists()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            // Ocupamos que el restaurante 1 exista para que el controlador nos deje pasar
-            db.Restaurants.Add(new Restaurant { Id = 1, Name = "Soda TEC", Address = "Cartago" });
-            await db.SaveChangesAsync();
-
-            var controller = new MenusController(db);
+            var mockRepo = new Mock<IMenuRepository>();
             var nuevoPlato = new Menu { Id = 1, Name = "Chifrijo", Price = 3500, RestaurantId = 1 };
+            
+            // Este método devuelve un booleano, así que sí ocupamos ReturnsAsync
+            mockRepo.Setup(repo => repo.RestaurantExistsAsync(1)).ReturnsAsync(true);
+            
+            // CreateAsync devuelve Task (void). Solo lo simulamos sin Returns. Moq hace el resto.
+            mockRepo.Setup(repo => repo.CreateAsync(It.IsAny<Menu>()));
+
+            var controller = new MenusController(mockRepo.Object);
 
             // Act
             var result = await controller.CreateMenu(nuevoPlato);
@@ -46,8 +38,11 @@ namespace RestauranteApi.Tests
         public async Task CreateMenu_ReturnsBadRequest_WhenRestaurantMissing()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            var controller = new MenusController(db);
+            var mockRepo = new Mock<IMenuRepository>();
+            
+            mockRepo.Setup(repo => repo.RestaurantExistsAsync(999)).ReturnsAsync(false);
+
+            var controller = new MenusController(mockRepo.Object);
             var platoHuerfano = new Menu { Id = 2, Name = "Casado", Price = 3000, RestaurantId = 999 };
 
             // Act
@@ -62,10 +57,13 @@ namespace RestauranteApi.Tests
         public async Task GetMenuDetails_ReturnsMenu_WhenExists()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            db.Menus.Add(new Menu { Id = 10, Name = "Tres Leches", Price = 1500, RestaurantId = 1 });
-            await db.SaveChangesAsync();
-            var controller = new MenusController(db);
+            var mockRepo = new Mock<IMenuRepository>();
+            var platoFalso = new Menu { Id = 10, Name = "Tres Leches", Price = 1500, RestaurantId = 1 };
+            
+            // Este método devuelve un Menu, así que sí ocupamos ReturnsAsync
+            mockRepo.Setup(repo => repo.GetByIdAsync(10)).ReturnsAsync(platoFalso);
+            
+            var controller = new MenusController(mockRepo.Object);
 
             // Act
             var result = await controller.GetMenuDetails(10);
@@ -80,38 +78,41 @@ namespace RestauranteApi.Tests
         public async Task UpdateMenu_ReturnsNoContent_WhenSuccessful()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            var menu = new Menu { Id = 5, Name = "Pizza", Price = 8000, RestaurantId = 1 };
-            db.Menus.Add(menu);
-            await db.SaveChangesAsync();
+            var mockRepo = new Mock<IMenuRepository>();
+            var menu = new Menu { Id = 5, Name = "Pizza", Price = 8500, RestaurantId = 1 };
+            
+            // UpdateAsync es Task. Solo lo "preparamos".
+            mockRepo.Setup(repo => repo.UpdateAsync(It.IsAny<Menu>()));
 
-            var controller = new MenusController(db);
-            menu.Price = 8500;
+            var controller = new MenusController(mockRepo.Object);
 
             // Act
             var result = await controller.UpdateMenu(5, menu);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            var menuInDb = await db.Menus.FindAsync(5);
-            Assert.Equal(8500, menuInDb!.Price);
+            mockRepo.Verify(repo => repo.UpdateAsync(menu), Times.Once); 
         }
 
         [Fact]
         public async Task DeleteMenu_ReturnsNoContent_WhenExists()
         {
             // Arrange
-            var db = GetDatabaseContext();
-            db.Menus.Add(new Menu { Id = 7, Name = "Sopa", Price = 2000, RestaurantId = 1 });
-            await db.SaveChangesAsync();
-            var controller = new MenusController(db);
+            var mockRepo = new Mock<IMenuRepository>();
+            var platoFalso = new Menu { Id = 7, Name = "Sopa", Price = 2000, RestaurantId = 1 };
+            
+            mockRepo.Setup(repo => repo.GetByIdAsync(7)).ReturnsAsync(platoFalso);
+            // DeleteAsync es Task. 
+            mockRepo.Setup(repo => repo.DeleteAsync(7));
+            
+            var controller = new MenusController(mockRepo.Object);
 
             // Act
             var result = await controller.DeleteMenu(7);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            Assert.Empty(db.Menus);
+            mockRepo.Verify(repo => repo.DeleteAsync(7), Times.Once);
         }
     }
 }

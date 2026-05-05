@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantesApi.Models;
-using RestaurantesApi.Repositories; // <-- Nueva referencia
+using RestaurantesApi.Repositories;
 
 namespace RestaurantesApi.Controllers
 {
@@ -9,7 +9,6 @@ namespace RestaurantesApi.Controllers
     [ApiController]
     public class ReservationsController : ControllerBase
     {
-        // Inyectamos la Interfaz
         private readonly IReservationRepository _repository; 
 
         public ReservationsController(IReservationRepository repository) 
@@ -21,11 +20,10 @@ namespace RestaurantesApi.Controllers
         [Authorize] 
         public async Task<ActionResult<Reservation>> CreateReservation(Reservation res)
         {
-            // La lógica de negocio se mantiene
+            // Estandarizamos el mensaje a un tono profesional
             if (res.ReservationDate < DateTime.Now) 
-                return BadRequest("No puede reservar en el pasado.");
+                return BadRequest("La fecha de reservación no puede ser en el pasado.");
 
-            // Delegamos a la base de datos
             await _repository.CreateAsync(res); 
 
             return CreatedAtAction(nameof(CreateReservation), new { id = res.Id }, res);
@@ -35,11 +33,10 @@ namespace RestaurantesApi.Controllers
         [Authorize]
         public async Task<IActionResult> CancelReservation(int id)
         {
-            // Buscamos a través del repositorio
             var res = await _repository.GetByIdAsync(id); 
             if (res == null) return NotFound();
 
-            // Borramos a través del repositorio
+            // Aquí notamos que DeleteAsync recibe el objeto 'res' completo
             await _repository.DeleteAsync(res); 
 
             return NoContent();
