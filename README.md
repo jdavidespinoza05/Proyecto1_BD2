@@ -13,7 +13,7 @@ Esta es una API REST desarrollada en .NET 9 diseñada para la gestión interna d
 
 1. Seguridad: Autenticación y autorización basada en JWT utilizando Keycloak.
 
-2. Base de Datos: Base de Datos: Persistencia políglota con PostgreSQL 16 y un clúster de MongoDB.
+2. Base de Datos: Base de Datos: Persistencia intercambiable con PostgreSQL 16 y un clúster de MongoDB.
 
 3. Infraestructura: Orquestación completa mediante Docker y Docker Compose.
 
@@ -26,7 +26,7 @@ Esta es una API REST desarrollada en .NET 9 diseñada para la gestión interna d
 
 
 * Arquitectura y Servicios
-El sistema se despliega mediante tres contenedores principales interconectados:
+El sistema se despliega mediante los siguientes contenedores principales interconectados:
 
 1. api_restaurante: Aplicación .NET 9 para usar los servicios REST.
 
@@ -131,4 +131,4 @@ David Espinoza Brenes - Estudiante de Ingeniería en Computación.
 Contribuciones: Infraestructura (Docker), Seguridad (Auth/Keycloak), Pruebas y Cobertura, Módulo de Usuarios, Documentación y Video, Caché (Redis), Búsquedas (ElasticSearch)
 
 Daniel Viquez Solano - Estudiante de Ingeniería en Computación.
-Contribuciones: Lógica de Restaurantes, Menús y Reservas, Documentación y Video,  
+Contribuciones: Lógica de Restaurantes, Menús y Reservas, Documentación y Video, Desarrollo de API, Diseño de Infraestructura y Orquestación (Nginx y réplicas de API), Automatización CI/CD, Persistencia Agnóstica (PostreSQL/MongoDB)
