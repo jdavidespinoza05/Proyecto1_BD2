@@ -41,7 +41,7 @@ jobs:
             echo "Error: La API o Nginx no responden (Status: $STATUS)"
             exit 1
           fi
-          echo "¡Integración exitosa!"
+          echo "Integración exitosa"
 
       - name: Apagar contenedores de prueba
         if: always() 
