@@ -1,15 +1,16 @@
 /*
- * SearchController
- * Se encarga de las búsquedas de productos en el sistema.
- * En lugar de buscar directamente en la base de datos con un repositorio, 
- * este controlador utiliza un servicio (ISearchService) que se comunica 
- * con ElasticSearch para hacer búsquedas de texto mucho más rápidas y precisas.
- * Tiene endpoints para buscar por palabra clave general o filtrando dentro 
- * de una categoría específica.
- * Incluye un método especial (reindex) que sirve para borrar y volver a 
- * cargar un set de datos de prueba directamente en el índice de ElasticSearch. 
- * Esto resulta súper útil para probar que las búsquedas funcionen bien sin 
- * tener que meter datos a mano.
+ Se encarga de las búsquedas de productos en el sistema.
+ En lugar de buscar directamente en la base de datos con un repositorio, 
+ este controlador utiliza un servicio (ISearchService) que se comunica 
+ con ElasticSearch para hacer búsquedas de texto mucho más rápidas y precisas.
+ 
+ Tiene endpoints para buscar por palabra clave general o filtrando dentro 
+ de una categoría específica.
+ Incluye un método especial (reindex) que sirve para borrar y volver a 
+ cargar un set de datos de prueba directamente en el índice de ElasticSearch. 
+ 
+ Esto resulta súper útil para probar que las búsquedas funcionen bien sin 
+ tener que meter datos a mano.
  */
 
 using Microsoft.AspNetCore.Mvc;

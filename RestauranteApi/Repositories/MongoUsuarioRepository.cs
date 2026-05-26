@@ -1,13 +1,13 @@
 /*
- * MongoUsuarioRepository
- * Es la implementación en MongoDB del contrato maestro para los usuarios.
- * Básicamente, es el encargado de hacer todo el trabajo de conexión con la 
- * colección "usuarios" en nuestra base de datos NoSQL.
- * Maneja todas las operaciones completas (CRUD) de los perfiles. 
- * Su función estrella es "GetByEmailAsync", que como vimos antes, es la 
- * pieza fundamental que usa el sistema para buscar a las personas al 
- * momento de hacer login o registrarse para que no haya correos duplicados.
- */
+Es la implementación en MongoDB del contrato maestro para los usuarios.
+Básicamente, es el encargado de hacer todo el trabajo de conexión con la 
+colección "usuarios" en nuestra base de datos NoSQL.
+
+Maneja todas las operaciones completas (CRUD) de los perfiles. 
+Su función estrella es "GetByEmailAsync", que como vimos antes, es la 
+pieza fundamental que usa el sistema para buscar a las personas al 
+momento de hacer login o registrarse para que no haya correos duplicados.
+*/
 
 using MongoDB.Driver;
 using RestaurantesApi.Models;

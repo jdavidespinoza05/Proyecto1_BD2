@@ -1,14 +1,16 @@
 /*
- * OrdersController
- * Se encarga de gestionar los pedidos de los clientes.
- * Mantiene la misma línea limpia usando IOrderRepository para comunicarse 
- * con la base de datos sin mezclar la lógica en el controlador.
- * A diferencia de los menús, aquí usamos [Authorize] de forma general sin 
- * especificar roles. Esto significa que cualquier usuario que haya iniciado 
- * sesión puede crear o ver sus pedidos (no necesitan ser administradores). 
- * También incluye una pequeña regla de negocio: revisa que el total del 
- * pedido sea mayor a cero antes de intentar guardarlo.
- */
+ Se encarga de gestionar los pedidos de los clientes.
+ 
+ Mantiene la misma línea limpia usando IOrderRepository para comunicarse 
+ con la base de datos sin mezclar la lógica en el controlador.
+ 
+ A diferencia de los menús, aquí usamos [Authorize] de forma general sin 
+ especificar roles. Esto significa que cualquier usuario que haya iniciado 
+ sesión puede crear o ver sus pedidos (no necesitan ser administradores). 
+ 
+ También incluye una pequeña regla de negocio: revisa que el total del 
+ pedido sea mayor a cero antes de intentar guardarlo.
+*/
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,13 +1,15 @@
 /*
- * Se encarga de manejar el login y el registro de usuarios en la API.
- * Básicamente funciona como un puente: se conecta con Keycloak para 
- * validar credenciales y generar los tokens de seguridad, delegando 
- * esa responsabilidad.
- * En el caso del registro, primero crea la cuenta en Keycloak y, si el 
- * proceso es exitoso, guarda los datos básicos del perfil en nuestra base 
- * de datos local utilizando IUsuarioRepository (para mantener la lógica 
- * de base de datos separada del controlador).
- */
+Se encarga de manejar el login y el registro de usuarios en la API.
+
+Básicamente funciona como un puente: se conecta con Keycloak para 
+validar credenciales y generar los tokens de seguridad, delegando 
+esa responsabilidad.
+
+En el caso del registro, primero crea la cuenta en Keycloak y, si el 
+proceso es exitoso, guarda los datos básicos del perfil en nuestra base 
+de datos local utilizando IUsuarioRepository (para mantener la lógica 
+de base de datos separada del controlador).
+*/
 
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
