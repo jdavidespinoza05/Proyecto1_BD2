@@ -1,13 +1,14 @@
 /*
- * ReservationsController
- * Se encarga de manejar las reservas de los usuarios en los restaurantes.
- * Sigue el mismo patrón que los demás controladores usando su propio 
- * repositorio (IReservationRepository) para las operaciones de base de datos.
- * Cualquier usuario con sesión iniciada ([Authorize]) puede hacer o cancelar 
- * sus reservas. Como detalle extra, tiene una validación lógica muy importante: 
- * comprueba que la fecha de la reservación no sea en el pasado antes de 
- * guardarla en el sistema.
- */
+Se encarga de manejar las reservas de los usuarios en los restaurantes.
+
+Sigue el mismo patrón que los demás controladores usando su propio 
+repositorio (IReservationRepository) para las operaciones de base de datos.
+
+Cualquier usuario con sesión iniciada ([Authorize]) puede hacer o cancelar 
+sus reservas. Como detalle extra, tiene una validación lógica muy importante: 
+comprueba que la fecha de la reservación no sea en el pasado antes de 
+guardarla en el sistema.
+*/
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

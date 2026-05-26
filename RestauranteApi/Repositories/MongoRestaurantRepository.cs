@@ -1,13 +1,14 @@
 /*
- * MongoRestaurantRepository
- * Es nuestro trabajador encargado de la colección "restaurants" en MongoDB.
- * Cumple con lo que exige la interfaz actual: traer toda la lista de 
- * restaurantes (usando un filtro vacío para obtenerlos todos, que es justo 
- * lo que el Controller necesita para su caché) y guardar nuevos locales.
- * Un detalle particular de este archivo es que ya trae preparados y listos 
- * los métodos adicionales (buscar, actualizar y eliminar) por si en algún 
- * momento deciden expandir el contrato de la interfaz y agregar esas funciones.
- */
+MongoRestaurantRepository
+Es nuestro trabajador encargado de la colección "restaurants" en MongoDB.
+
+Cumple con lo que exige la interfaz actual: traer toda la lista de 
+restaurantes (usando un filtro vacío para obtenerlos todos, que es justo 
+lo que el Controller necesita para su caché) y guardar nuevos locales.
+Un detalle particular de este archivo es que ya trae preparados y listos 
+los métodos adicionales (buscar, actualizar y eliminar) por si en algún 
+momento deciden expandir el contrato de la interfaz y agregar esas funciones.
+*/
 
 using MongoDB.Driver;
 using RestaurantesApi.Models;

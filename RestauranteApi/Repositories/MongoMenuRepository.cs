@@ -1,17 +1,18 @@
 /*
- * MongoMenuRepository
- * Este es nuestro "cocinero experto en NoSQL". Es el archivo que firma el 
- * contrato IMenuRepository y contiene el código real para gestionar 
- * los menús específicamente dentro de MongoDB.
- * En lugar de usar tablas y filas como Postgres, aquí la lógica se conecta 
- * a "colecciones" de documentos.
- * Un detalle clave de su implementación es que, para poder cumplir con 
- * la regla de "validar si un restaurante existe" antes de crear un plato, 
- * este repositorio necesita conectarse tanto a la colección de "menus" 
- * como a la de "restaurants". 
- * Traduce todas las tareas que pedía la interfaz a comandos nativos 
- * de Mongo, como InsertOneAsync o ReplaceOneAsync.
- */
+Este es nuestro "cocinero experto en NoSQL". Es el archivo que firma el 
+contrato IMenuRepository y contiene el código real para gestionar 
+los menús específicamente dentro de MongoDB.
+En lugar de usar tablas y filas como Postgres, aquí la lógica se conecta 
+a "colecciones" de documentos.
+
+Un detalle clave de su implementación es que, para poder cumplir con 
+la regla de "validar si un restaurante existe" antes de crear un plato, 
+este repositorio necesita conectarse tanto a la colección de "menus" 
+como a la de "restaurants".
+
+Traduce todas las tareas que pedía la interfaz a comandos nativos 
+de Mongo, como InsertOneAsync o ReplaceOneAsync.
+*/
 
 using MongoDB.Driver;
 using RestaurantesApi.Models;

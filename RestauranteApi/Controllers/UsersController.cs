@@ -1,15 +1,17 @@
 /*
- * UsersController
- * Se encarga de gestionar la información de los perfiles de usuario.
- * A diferencia de otros controladores, este tiene la etiqueta [Authorize] 
- * a nivel general, por lo que absolutamente nadie sin sesión iniciada 
- * puede usar estas rutas.
- * El detalle más interesante es el endpoint "me" (GetMe): en lugar de 
- * pedir un ID en la URL, lee el token de seguridad por debajo (los claims) 
- * para extraer el correo de la persona logueada y buscar sus datos 
- * automáticamente en el IUsuarioRepository.
- * También incluye las funciones básicas para actualizar y eliminar 
- * usuarios, controlando los errores en caso de que el perfil no exista.
+ UsersController
+ Se encarga de gestionar la información de los perfiles de usuario.
+ A diferencia de otros controladores, este tiene la etiqueta [Authorize] 
+ a nivel general, por lo que absolutamente nadie sin sesión iniciada 
+ puede usar estas rutas.
+ 
+ El detalle más interesante es el endpoint "me" (GetMe): en lugar de 
+ pedir un ID en la URL, lee el token de seguridad por debajo (los claims) 
+ para extraer el correo de la persona logueada y buscar sus datos 
+ automáticamente en el IUsuarioRepository.
+ 
+ También incluye las funciones básicas para actualizar y eliminar 
+ usuarios, controlando los errores en caso de que el perfil no exista.
  */
 
 using Microsoft.AspNetCore.Authorization;

@@ -1,13 +1,13 @@
 /*
- * MongoReservationRepository
- * Es la implementación en MongoDB del contrato para gestionar las reservas.
- * Al igual que los demás repositorios de este tipo, se encarga del trabajo 
- * real en la base de datos, conectándose a la colección "reservations".
- * Cumple al pie de la letra con lo que exige IReservationRepository: 
- * utiliza comandos de NoSQL (InsertOneAsync, DeleteOneAsync) para guardar 
- * nuevas reservaciones, buscar sus detalles por ID y eliminarlas cuando 
- * el usuario decide cancelar.
- */
+Es la implementación en MongoDB del contrato para gestionar las reservas.
+Al igual que los demás repositorios de este tipo, se encarga del trabajo 
+real en la base de datos, conectándose a la colección "reservations".
+
+Cumple al pie de la letra con lo que exige IReservationRepository: 
+utiliza comandos de NoSQL (InsertOneAsync, DeleteOneAsync) para guardar 
+nuevas reservaciones, buscar sus detalles por ID y eliminarlas cuando 
+el usuario decide cancelar.
+*/
 
 using MongoDB.Driver;
 using RestaurantesApi.Models;

@@ -1,16 +1,18 @@
 /*
- * RestaurantsController
- * Se encarga de gestionar la información de los restaurantes.
- * Aparte de usar su repositorio (IRestaurantRepository), este controlador 
- * tiene la particularidad de implementar caché distribuida (IDistributedCache) 
- * para hacer que la API responda mucho más rápido.
- * Al pedir la lista de restaurantes, primero busca en la caché; si la 
- * encuentra, la devuelve de inmediato. Si no, va a la base de datos y 
- * guarda esos resultados en memoria por 5 minutos.
- * Crear un restaurante es exclusivo para administradores y tiene un 
- * detalle clave: al agregar uno nuevo, el sistema borra la caché 
- * automáticamente para forzar que la lista se actualice en la próxima consulta.
- */
+Se encarga de gestionar la información de los restaurantes.
+
+Aparte de usar su repositorio (IRestaurantRepository), este controlador 
+tiene la particularidad de implementar caché distribuida (IDistributedCache) 
+para hacer que la API responda mucho más rápido.
+
+Al pedir la lista de restaurantes, primero busca en la caché; si la 
+encuentra, la devuelve de inmediato. Si no, va a la base de datos y 
+guarda esos resultados en memoria por 5 minutos.
+
+Crear un restaurante es exclusivo para administradores y tiene un 
+detalle clave: al agregar uno nuevo, el sistema borra la caché 
+automáticamente para forzar que la lista se actualice en la próxima consulta.
+*/
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
