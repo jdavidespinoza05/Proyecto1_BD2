@@ -1,3 +1,22 @@
+/*
+Este archivo define el modelo Order, que representa una orden realizada por un
+usuario dentro del sistema de restaurantes.
+
+La clase se mapea con la tabla "orders" de PostgreSQL utilizando anotaciones de
+Entity Framework. Cada propiedad corresponde a una columna de la tabla, como el
+identificador de la orden, el usuario que la realizó, el restaurante asociado,
+la fecha de creación, el monto total y el estado actual de la orden.
+
+El campo OrderDate se inicializa automáticamente con la fecha y hora actual en
+formato UTC, lo que permite registrar cuándo fue creada la orden. Además, el
+estado inicia por defecto como "Preparando", representando el flujo inicial de
+una orden dentro del sistema.
+
+Este modelo sirve como base para registrar y consultar órdenes desde la API,
+manteniendo organizada la información relacionada con las compras o pedidos de
+los usuarios.
+*/
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
