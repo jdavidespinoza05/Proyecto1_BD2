@@ -69,7 +69,14 @@ Haga clic en "Create Realm" y seleccione el botón "Browse" para subir el archiv
 
 Esto cargará automáticamente el cliente restaurantes-api, los roles de admin y cliente, y los usuarios de prueba.
 
+* Guía de Cambio de Motor de Base de Datos (Postgres/Mongo)
 
+Para cambiar de motor de base de datos el primero paso es abrir el archivo "docker-compose.yml".
+
+Una vez dentro, el siguiente paso es moverse a la linea 61 aproximadamente, en la instruccion dentro de environment que dice: - DatabaseEngine=Mongo
+(NOTA: Tambien podria decir - DatabaseEngine=Postgres depende de cual motor se este usando en el momento.)
+
+Para cambiar el motor de base de datos basta con cambiar dicha linea por - DatabaseEngine=Mongo o - DatabaseEngine=Postgres respectivamente dependiendo del motor que se quiera usar. Luego, se guarda el archivo y listo, ya se puede usar el nuevo motor.
 
 * Documentación de la API (Swagger)
 Todo el tráfico hacia la API ahora está siendo protegido y distribuido por el balanceador de carga Nginx. Una vez que el entorno esté corriendo, la documentación interactiva de Swagger estará disponible directamente en:

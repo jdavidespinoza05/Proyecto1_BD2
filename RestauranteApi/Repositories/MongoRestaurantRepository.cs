@@ -1,3 +1,14 @@
+/*
+ * MongoRestaurantRepository
+ * Es nuestro trabajador encargado de la colección "restaurants" en MongoDB.
+ * Cumple con lo que exige la interfaz actual: traer toda la lista de 
+ * restaurantes (usando un filtro vacío para obtenerlos todos, que es justo 
+ * lo que el Controller necesita para su caché) y guardar nuevos locales.
+ * Un detalle particular de este archivo es que ya trae preparados y listos 
+ * los métodos adicionales (buscar, actualizar y eliminar) por si en algún 
+ * momento deciden expandir el contrato de la interfaz y agregar esas funciones.
+ */
+
 using MongoDB.Driver;
 using RestaurantesApi.Models;
 
@@ -9,25 +20,19 @@ namespace RestaurantesApi.Repositories
 
         public MongoRestaurantRepository(IMongoDatabase database)
         {
-            // Conecta con la "tabla" (colección) de restaurantes en Mongo
             _coleccion = database.GetCollection<Restaurant>("restaurants");
         }
 
         public async Task<IEnumerable<Restaurant>> GetAllAsync()
         {
-            // En Mongo, Find con un filtro vacío {} trae todos los registros
             return await _coleccion.Find(_ => true).ToListAsync();
         }
 
         public async Task<Restaurant> CreateAsync(Restaurant restaurant)
         {
-            // Inserta el restaurante y lo devuelve (como pide tu Task<Restaurant>)
             await _coleccion.InsertOneAsync(restaurant);
             return restaurant; 
         }
-
-        // NOTA: Si tu interfaz IRestaurantRepository tiene GetById, Update o Delete, 
-        // aquí te dejo cómo serían para que los agregues si te hacen falta:
 
         public async Task<Restaurant?> GetByIdAsync(int id)
         {
@@ -39,7 +44,7 @@ namespace RestaurantesApi.Repositories
             await _coleccion.ReplaceOneAsync(r => r.Id == restaurant.Id, restaurant);
         }
 
-        public async Task DeleteAsync(int id) // O DeleteAsync(Restaurant restaurant) dependiendo de tu interfaz
+        public async Task DeleteAsync(int id) 
         {
             await _coleccion.DeleteOneAsync(r => r.Id == id);
         }

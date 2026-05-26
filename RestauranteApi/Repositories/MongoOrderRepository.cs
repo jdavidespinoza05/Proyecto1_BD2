@@ -1,3 +1,14 @@
+/*
+ * MongoOrderRepository
+ * Es la implementación en MongoDB del contrato para gestionar los pedidos.
+ * Como vimos en su interfaz (IOrderRepository), este archivo es súper 
+ * directo y al grano: solo se conecta a la colección "orders" de la base 
+ * de datos para insertar un pedido nuevo o buscar uno por su ID.
+ * Utiliza las funciones nativas de Mongo (InsertOneAsync y Find) para 
+ * hacer el trabajo real de persistencia, manteniendo así a nuestro 
+ * controlador totalmente libre de esta lógica.
+ */
+
 using MongoDB.Driver;
 using RestaurantesApi.Models;
 
@@ -9,20 +20,17 @@ namespace RestaurantesApi.Repositories
 
         public MongoOrderRepository(IMongoDatabase database)
         {
-            // Conecta con la "tabla" (colección) de órdenes/pedidos en Mongo
             _coleccion = database.GetCollection<Order>("orders");
         }
 
         public async Task<Order> CreateAsync(Order order)
         {
-            // Inserta la orden en la base de datos
             await _coleccion.InsertOneAsync(order);
-            return order; // Retornamos el objeto con sus datos (como pide la interfaz)
+            return order; 
         }
 
         public async Task<Order?> GetByIdAsync(int id)
         {
-            // Busca la primera orden que coincida con el ID
             return await _coleccion.Find(o => o.Id == id).FirstOrDefaultAsync();
         }
     }

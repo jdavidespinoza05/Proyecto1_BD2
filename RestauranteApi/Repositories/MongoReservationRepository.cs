@@ -1,3 +1,14 @@
+/*
+ * MongoReservationRepository
+ * Es la implementación en MongoDB del contrato para gestionar las reservas.
+ * Al igual que los demás repositorios de este tipo, se encarga del trabajo 
+ * real en la base de datos, conectándose a la colección "reservations".
+ * Cumple al pie de la letra con lo que exige IReservationRepository: 
+ * utiliza comandos de NoSQL (InsertOneAsync, DeleteOneAsync) para guardar 
+ * nuevas reservaciones, buscar sus detalles por ID y eliminarlas cuando 
+ * el usuario decide cancelar.
+ */
+
 using MongoDB.Driver;
 using RestaurantesApi.Models;
 
@@ -9,26 +20,22 @@ namespace RestaurantesApi.Repositories
 
         public MongoReservationRepository(IMongoDatabase database)
         {
-            // Conecta con la "tabla" (colección) de reservaciones en Mongo
             _coleccion = database.GetCollection<Reservation>("reservations");
         }
 
         public async Task<Reservation> CreateAsync(Reservation res)
         {
-            // Inserta la reservación
             await _coleccion.InsertOneAsync(res);
-            return res; // Retornamos el objeto completo
+            return res; 
         }
 
         public async Task<Reservation?> GetByIdAsync(int id)
         {
-            // Busca la primera reservación que coincida con el ID
             return await _coleccion.Find(r => r.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task DeleteAsync(Reservation res)
         {
-            // Elimina la reservación usando el ID del objeto que recibe
             await _coleccion.DeleteOneAsync(r => r.Id == res.Id);
         }
     }
