@@ -1,7 +1,19 @@
+/*
+ * MenusController
+ * Se encarga de gestionar los platillos (menús) de los restaurantes.
+ * Al igual que en autenticación, usamos un repositorio (IMenuRepository) para 
+ * mantener el acceso a la base de datos separado del controlador.
+ * Contiene las operaciones básicas (CRUD): crear, buscar, editar y eliminar.
+ * Un detalle clave de seguridad en este archivo es que cualquier usuario puede 
+ * ver los detalles de un plato, pero protegemos con [Authorize(Roles = "admin")] 
+ * los métodos de crear, modificar o borrar. Además, antes de agregar un platillo 
+ * nuevo, siempre verificamos que el restaurante asociado realmente exista.
+ */
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantesApi.Models;
-using RestaurantesApi.Repositories; // ¡Importante agregar esto!
+using RestaurantesApi.Repositories;
 
 namespace RestaurantesApi.Controllers
 {
@@ -11,7 +23,6 @@ namespace RestaurantesApi.Controllers
     {
         private readonly IMenuRepository _repository;
 
-        // Inyectamos la Interfaz, no el AppDbContext
         public MenusController(IMenuRepository repository)
         {
             _repository = repository;

@@ -1,9 +1,20 @@
+/*
+ * Se encarga de manejar el login y el registro de usuarios en la API.
+ * Básicamente funciona como un puente: se conecta con Keycloak para 
+ * validar credenciales y generar los tokens de seguridad, delegando 
+ * esa responsabilidad.
+ * En el caso del registro, primero crea la cuenta en Keycloak y, si el 
+ * proceso es exitoso, guarda los datos básicos del perfil en nuestra base 
+ * de datos local utilizando IUsuarioRepository (para mantener la lógica 
+ * de base de datos separada del controlador).
+ */
+
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using RestaurantesApi.Models; 
-using RestaurantesApi.Repositories; // <-- Nueva referencia
+using RestaurantesApi.Repositories; 
 
 namespace RestaurantesApi.Controllers;
 
@@ -13,7 +24,6 @@ public class AuthController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     
-    // CAMBIO 1: Adiós AppDbContext, hola IUsuarioRepository
     private readonly IUsuarioRepository _repository; 
     
     private readonly string _keycloakClientSecret = "zK4YVM7kzzJmZEAv6OWEQZR9GLkL1AFM"; 
@@ -27,7 +37,6 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // Todo esto se queda exactamente igual porque es lógica de Keycloak
         if (request == null || string.IsNullOrEmpty(request.Username))
             return BadRequest(new { mensaje = "Hacen falta datos." });
 
@@ -54,11 +63,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        // CAMBIO 2: Verificamos si existe usando el repositorio en lugar de _context.Usuarios.AnyAsync
         var usuarioExistente = await _repository.GetByEmailAsync(request.Email);
         if (usuarioExistente != null) return BadRequest(new { mensaje = "El correo ya está registrado." });
 
-        // --- INICIO BLOQUE KEYCLOAK (Intacto) ---
         var client = _httpClientFactory.CreateClient();
 
         var tokenData = new FormUrlEncodedContent(new[]
@@ -103,7 +110,6 @@ public class AuthController : ControllerBase
         }
 
         var keycloakUserId = createKcResponse.Headers.Location?.Segments.Last();
-        // --- FIN BLOQUE KEYCLOAK ---
 
         try 
         {
@@ -114,7 +120,6 @@ public class AuthController : ControllerBase
                 Rol = string.IsNullOrWhiteSpace(request.Rol) ? "cliente" : request.Rol.ToLower()
             };
 
-            // CAMBIO 3: Guardamos en la BD local delegando al repositorio
             await _repository.CreateAsync(nuevoUsuarioDb);
 
             return Ok(new { 
