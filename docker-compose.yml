@@ -1,8 +1,27 @@
+# Este archivo se encarga de levantar toda la infraestructura del sistema
+# por medio de Docker Compose.
+#
+# Aquí se definen todos los servicios que necesita la aplicación para funcionar:
+# PostgreSQL como base de datos relacional principal, Keycloak para manejar la
+# autenticación y los roles, Redis como caché, MongoDB configurado como clúster
+# con sharding, Elasticsearch para búsquedas, la API desarrollada en .NET y Nginx
+# como balanceador de carga.
+#
+# La idea de este archivo es poder ejecutar el sistema completo en un ambiente
+# local de forma ordenada, sin tener que configurar cada servicio manualmente.
+# Cada contenedor se comunica con los demás por medio de la red interna
+# restaurante_net, lo que permite que la API pueda conectarse a servicios como
+# PostgreSQL, Redis, MongoDB, Keycloak y Elasticsearch usando los nombres de los
+# servicios como si fueran direcciones internas.
+#
+# También se definen volúmenes para conservar la información aunque los
+# contenedores se detengan o se reinicien. Esto es importante para no perder los
+# datos de PostgreSQL, MongoDB, Keycloak y Elasticsearch durante las pruebas del
+# proyecto.
+
 version: '3.8'
 
 services:
-  #SERVICIO DE PERSISTENCIA: PostgreSQL 16
-  #Provee la base de datos relacional para el almacenamiento de usuarios, menús y reservas
   db:
     image: postgres:16
     container_name: base_datos_restaurante
@@ -18,25 +37,21 @@ services:
     networks:
       - restaurante_net
 
-  #SERVICIO DE IDENTIDAD: Keycloak
-  #Actúa como el proveedor de identidad externo para la gestión de JWT y roles
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: auth_restaurante
-    command: start-dev --import-realm # <-- Agregamos esto para que importe el JSON
+    command: start-dev --import-realm 
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
     volumes:
-      - ./keycloak_data:/opt/keycloak/data # Carpeta local para la base de datos interna
-      - ./keycloak_import:/opt/keycloak/data/import # Carpeta para el archivo JSON
+      - ./keycloak_data:/opt/keycloak/data
+      - ./keycloak_import:/opt/keycloak/data/import 
     networks:
       - restaurante_net
 
-  #SERVICIO DE CACHÉ: Redis
-  #Almacenamiento en memoria para acelerar respuestas frecuentes de la API
   redis:
     image: redis:latest
     container_name: cache_restaurante
@@ -45,8 +60,6 @@ services:
     networks:
       - restaurante_net
 
-  #SERVICIO DE LÓGICA DE NEGOCIO: API REST (.NET 9)
-  #Aplicación principal que integra la base de datos y el servicio de autenticación
   api:
     build:
       context: ./RestauranteApi 
@@ -60,9 +73,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - DatabaseEngine=Postgres
       - ConnectionStrings__MongoConnection=mongodb://mongo-router:27017
-      #Configuración de conexión utilizando el DNS interno de Docker (Host=db)
       - ConnectionStrings__DefaultConnection=Host=db;Database=reservas_db;Username=admin;Password=password123
-      #Configuración de autoridad JWT apuntando al contenedor de Keycloak
       - Jwt__Authority=http://keycloak:8080/realms/RestaurantesRealm
       - Jwt__Audience=account
       - ConnectionStrings__RedisConnection=redis:6379
@@ -75,9 +86,6 @@ services:
     networks:
       - restaurante_net
 
-# CLÚSTER MONGODB ------------------------------------------ 
-# Config server
-# El servidor de configuración guarda los metadatos y el mapa del sharding
   mongo-config:
     image: mongo:7.0
     container_name: mongo_config
@@ -89,12 +97,9 @@ services:
     networks:
       - restaurante_net
 
-# Shard (replica set)
-# Nodo 1 (Primario)
   mongo-shard-1a:
     image: mongo:7.0
     container_name: mongo_shard_1a
-    # El comando --shardsvr le dice que es un trabajador de almacenamiento
     command: mongod --shardsvr --replSet shard1RS --port 27018 --bind_ip_all
     ports:
       - "27118:27018"
@@ -103,7 +108,6 @@ services:
     networks:
       - restaurante_net
 
-  # Nodo 2 (Secundario)
   mongo-shard-1b:
     image: mongo:7.0
     container_name: mongo_shard_1b
@@ -115,7 +119,6 @@ services:
     networks:
       - restaurante_net
 
-  # Nodo 3 (Secundario)
   mongo-shard-1c:
     image: mongo:7.0
     container_name: mongo_shard_1c
@@ -127,14 +130,12 @@ services:
     networks:
       - restaurante_net
 
-# Router (mongos)
   mongo-router:
     image: mongo:7.0
     container_name: mongo_router
-    # Aquí le decimos al recepcionista dónde está el directorio (Config Server)
     command: mongos --configdb configRS/mongo-config:27019 --bind_ip_all
     ports:
-      - "27017:27017" # El puerto estándar de Mongo, para que la API se conecte fácil
+      - "27017:27017"
     networks:
       - restaurante_net
     depends_on:
@@ -143,7 +144,6 @@ services:
       - mongo-shard-1b
       - mongo-shard-1c
 
-# Balanceador de carga (Nginx)
   nginx:
     image: nginx:latest
     container_name: balanceador_restaurante
@@ -155,16 +155,14 @@ services:
       - api
     networks:
       - restaurante_net
-  
-# SERVICIO DE BÚSQUEDA: ElasticSearch
-  # Motor de búsqueda inteligente y texto completo para el catálogo de productos
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: buscador_restaurante
     environment:
-      - discovery.type=single-node # Modo desarrollo: funciona sin necesitar un clúster entero
-      - xpack.security.enabled=false # Desactiva HTTPS y autenticación compleja para desarrollo local
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Límite estricto de memoria RAM (512MB)
+      - discovery.type=single-node 
+      - xpack.security.enabled=false 
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m 
     ports:
       - "9200:9200"
     volumes:
@@ -172,7 +170,6 @@ services:
     networks:
       - restaurante_net
 
-#VOLÚMENES: Garantizan la persistencia de datos tras el reinicio de los contenedores
 volumes:
   base_datos_nueva:
   keycloak_data:

@@ -1,3 +1,20 @@
+/*
+Se encarga de manejar las operaciones relacionadas con las reservaciones en la
+base de datos PostgreSQL.
+
+Esta clase permite crear nuevas reservaciones, buscar una reservación específica
+por su identificador y eliminar reservaciones cuando sea necesario. Su función
+principal es centralizar el acceso a los datos de reservas para que el resto de
+la aplicación no dependa directamente de Entity Framework.
+
+Al trabajar mediante IReservationRepository, el controlador o servicio que use
+esta clase no necesita saber cómo se guardan los datos internamente, sino que
+solo utiliza métodos definidos para cada operación.
+
+Esto ayuda a mantener el proyecto más ordenado, con una separación clara entre
+la lógica de negocio y la lógica de base de datos.
+*/
+
 using RestaurantesApi.Data;
 using RestaurantesApi.Models;
 

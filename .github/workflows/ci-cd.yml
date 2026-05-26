@@ -1,3 +1,27 @@
+# Este archivo define el pipeline de integración y despliegue continuo del
+# sistema de restaurantes utilizando GitHub Actions.
+#
+# Su función principal es automatizar el proceso de verificación del proyecto
+# cada vez que se realiza un push o un pull request hacia las ramas main o master.
+# De esta forma, se valida que el código compile correctamente, que las pruebas
+# unitarias pasen y que la infraestructura principal pueda levantarse con Docker.
+#
+# El pipeline se divide en dos trabajos principales. El primero se encarga de
+# descargar el código, configurar .NET 9, restaurar dependencias, compilar el
+# proyecto y ejecutar las pruebas unitarias. Después, levanta los contenedores
+# definidos en Docker Compose para realizar una prueba de integración sencilla,
+# verificando que la API responda correctamente a través de Nginx.
+#
+# El segundo trabajo se ejecuta únicamente si el primero finaliza correctamente.
+# Su objetivo es construir la imagen Docker de la API y publicarla en GitHub
+# Container Registry. Para evitar errores con nombres en mayúsculas, primero se
+# convierte el nombre del repositorio a minúsculas antes de generar la etiqueta
+# de la imagen.
+#
+# En conjunto, este archivo ayuda a asegurar que el sistema mantenga una base
+# estable, automatizando validaciones importantes antes de publicar una nueva
+# versión de la aplicación.
+
 name: Pipeline CI/CD Restaurante
 
 on:

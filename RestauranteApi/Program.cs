@@ -1,3 +1,39 @@
+/*
+Este archivo contiene la configuración principal de arranque de la API del
+sistema de restaurantes.
+
+Aquí se registran los servicios que necesita la aplicación para funcionar,
+como los controladores, Swagger, autenticación con JWT, autorización, conexión
+a bases de datos, Redis, Elasticsearch y los repositorios utilizados por la API.
+
+También se configura la integración con Keycloak. La API recibe tokens JWT y
+extrae los roles definidos en Keycloak para convertirlos en claims que .NET
+pueda interpretar correctamente con [Authorize]. Esto permite proteger endpoints
+según los permisos o roles del usuario autenticado.
+
+Además, se configura Swagger para que permita probar endpoints protegidos usando
+tokens Bearer. Esto facilita las pruebas durante el desarrollo, ya que se puede
+ingresar el token directamente desde la interfaz de Swagger.
+
+El archivo también incluye la configuración de Redis como sistema de caché y
+Elasticsearch como servicio de búsqueda. Redis se utiliza para mejorar el
+rendimiento en operaciones frecuentes, mientras que Elasticsearch permite
+realizar búsquedas más rápidas y avanzadas dentro del sistema.
+
+Una parte importante de este archivo es el switch de bases de datos. Dependiendo
+del valor configurado en DatabaseEngine, la aplicación puede trabajar con
+PostgreSQL o con MongoDB. Si se usa PostgreSQL, se registra AppDbContext con
+Entity Framework y se cargan los repositorios correspondientes. Si se usa
+MongoDB, se registra el cliente de Mongo y se utilizan los repositorios
+implementados para esa base documental.
+
+Finalmente, durante el arranque de la aplicación, si el motor seleccionado es
+PostgreSQL, se ejecutan automáticamente las migraciones pendientes para crear o
+actualizar las tablas necesarias. Después se habilitan los middlewares de
+autenticación y autorización, se mapean los controladores y se activa Swagger
+cuando el sistema se ejecuta en ambiente de desarrollo.
+*/
+
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using RestaurantesApi.Data;
@@ -10,14 +46,12 @@ using RestaurantesApi.Repositories;
 using Elastic.Clients.Elasticsearch;
 using RestaurantesApi.Services;
 
-// PASO 1: Limpiar el mapeo automático de claims para que .NET use nombres simples
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 
-// Configuración de Swagger para soporte de JWT
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -44,7 +78,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuración de Autenticación JWT con "Traductor de Roles" para Keycloak
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -54,10 +87,10 @@ builder.Services.AddAuthentication("Bearer")
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false, // Evita conflictos entre localhost y el nombre del contenedor en Docker
+            ValidateIssuer = false, 
             ValidateAudience = false,
             NameClaimType = "preferred_username",
-            RoleClaimType = ClaimTypes.Role // .NET buscará los roles aquí
+            RoleClaimType = ClaimTypes.Role 
         };
 
         options.Events = new JwtBearerEvents
@@ -67,14 +100,12 @@ builder.Services.AddAuthentication("Bearer")
                 var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
                 if (claimsIdentity == null) return Task.CompletedTask;
 
-                // Buscamos el claim 'realm_access' que vimos en el /debug-auth
                 var realmAccessClaim = context.Principal?.FindFirst("realm_access")?.Value;
 
                 if (!string.IsNullOrEmpty(realmAccessClaim))
                 {
                     try 
                     {
-                        // Parseamos el JSON interno para extraer la lista de roles
                         using var doc = JsonDocument.Parse(realmAccessClaim);
                         if (doc.RootElement.TryGetProperty("roles", out var roles))
                         {
@@ -83,7 +114,6 @@ builder.Services.AddAuthentication("Bearer")
                                 var roleName = role.GetString();
                                 if (!string.IsNullOrEmpty(roleName))
                                 {
-                                    // Agregamos el rol como un claim oficial que [Authorize] pueda leer
                                     claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, roleName));
                                 }
                             }
@@ -91,7 +121,6 @@ builder.Services.AddAuthentication("Bearer")
                     }
                     catch 
                     { 
-                        // Si el JSON no es válido, no hacemos nada para evitar que la API se caiga
                     }
                 }
                 return Task.CompletedTask;
@@ -103,45 +132,27 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
-// =======================================================================
-// INICIO CONFIGURACIÓN REDIS (PASO 3)
-// =======================================================================
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    // Lee la conexión que pusiste en el appsettings.json
     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
-    options.InstanceName = "RestaurantesApi_"; // Un prefijo para no mezclar datos en memoria
+    options.InstanceName = "RestaurantesApi_"; 
 });
-// =======================================================================
-// FIN CONFIGURACIÓN REDIS
-// =======================================================================
 
-// =======================================================================
-// INICIO CONFIGURACIÓN ELASTICSEARCH
-// =======================================================================
 var elasticUri = builder.Configuration.GetConnectionString("ElasticConnection") ?? "http://localhost:9200";
 
-// Configuramos las opciones para habilitar la depuración
 var settings = new ElasticsearchClientSettings(new Uri(elasticUri))
     .EnableDebugMode(); 
 
 builder.Services.AddSingleton<ElasticsearchClient>(new ElasticsearchClient(settings));
 builder.Services.AddScoped<ISearchService, ElasticSearchService>();
-// =======================================================================
-// =======================================================================
-// INICIO DEL SWITCH DE BASES DE DATOS (NUEVA ARQUITECTURA)
-// =======================================================================
 
-// Leemos la variable desde el appsettings.json (si no existe, usa Postgres por defecto)
 var dbEngine = builder.Configuration["DatabaseEngine"] ?? "Postgres";
 
 if (dbEngine.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
 {
-    // 1. Configuramos el DbContext de Entity Framework como siempre
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    // 2. Le decimos a .NET que entregue los repositorios de PostgreSQL cuando un Controller pida una Interfaz
     builder.Services.AddScoped<IMenuRepository, PostgresMenuRepository>();
     builder.Services.AddScoped<IOrderRepository, PostgresOrderRepository>();
     builder.Services.AddScoped<IReservationRepository, PostgresReservationRepository>();
@@ -150,33 +161,25 @@ if (dbEngine.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
 }
 else if (dbEngine.Equals("Mongo", StringComparison.OrdinalIgnoreCase))
 {
-    // 1. Conectamos el driver oficial de MongoDB
     builder.Services.AddSingleton<MongoDB.Driver.IMongoClient>(sp => 
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        // Busca la variable en appsettings, si no la encuentra usa localhost
         var connectionString = configuration.GetConnectionString("MongoConnection") ?? "mongodb://localhost:27017";
         return new MongoDB.Driver.MongoClient(connectionString);
     });
 
-    // Registramos la base de datos específica ("reservas_db")
     builder.Services.AddScoped(sp => 
     {
         var client = sp.GetRequiredService<MongoDB.Driver.IMongoClient>();
         return client.GetDatabase("reservas_db");
     });
 
-    // 2. Le decimos a .NET que entregue los repositorios de MongoDB
     builder.Services.AddScoped<IMenuRepository, MongoMenuRepository>();
     builder.Services.AddScoped<IOrderRepository, MongoOrderRepository>();
     builder.Services.AddScoped<IReservationRepository, MongoReservationRepository>();
     builder.Services.AddScoped<IRestaurantRepository, MongoRestaurantRepository>();
     builder.Services.AddScoped<IUsuarioRepository, MongoUsuarioRepository>();
 }
-
-// =======================================================================
-// FIN DEL SWITCH DE BASES DE DATOS
-// =======================================================================
 
 var app = builder.Build();
 
@@ -198,14 +201,11 @@ if (dbEngine.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
     }
 }
 
-
-// Middlewares de seguridad: El orden es vital
 app.UseAuthentication(); 
 app.UseAuthorization();  
 
 app.MapControllers();
 
-// Endpoint de diagnóstico para que verifiqués tus roles en Swagger
 app.MapGet("/debug-auth", (ClaimsPrincipal user) =>
 {
     return user.Claims.Select(c => new { c.Type, c.Value });
@@ -219,7 +219,6 @@ if (app.Environment.IsDevelopment())
 
 app.Run();
 
-// Definición para el endpoint de salud/prueba
 public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
