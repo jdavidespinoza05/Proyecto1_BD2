@@ -14,6 +14,8 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed; 
+using System.Text.Json; 
 using RestaurantesApi.Models;
 using RestaurantesApi.Services;
 
@@ -24,10 +26,12 @@ namespace RestaurantesApi.Controllers
     public class SearchController : ControllerBase
     {
         private readonly ISearchService _searchService;
+        private readonly IDistributedCache _cache; 
 
-        public SearchController(ISearchService searchService)
+        public SearchController(ISearchService searchService, IDistributedCache cache)
         {
             _searchService = searchService;
+            _cache = cache; 
         }
 
         [HttpGet("products")]
@@ -35,10 +39,26 @@ namespace RestaurantesApi.Controllers
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
-                return BadRequest("Debes enviar una palabra clave en el parámetro 'keyword'.");
+                return BadRequest("Debe proporcionar una palabra clave en el parámetro 'keyword'.");
+            }
+
+            string terminoLimpio = keyword.Trim().ToLower();
+            string cacheKey = $"busqueda_productos_{terminoLimpio}";
+
+            var busquedaCache = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(busquedaCache))
+            {
+                var resultadosGuardados = JsonSerializer.Deserialize<IEnumerable<ProductoBusqueda>>(busquedaCache);
+                return Ok(resultadosGuardados);
             }
 
             var resultados = await _searchService.SearchProductsAsync(keyword);
+
+            var opcionesCache = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+            
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(resultados), opcionesCache);
+
             return Ok(resultados);
         }
 
@@ -47,10 +67,27 @@ namespace RestaurantesApi.Controllers
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
-                return BadRequest("Debes enviar una palabra clave en el parámetro 'keyword'.");
+                return BadRequest("Debe proporcionar una palabra clave en el parámetro 'keyword'.");
+            }
+
+            string categoriaLimpia = categoria.Trim().ToLower();
+            string terminoLimpio = keyword.Trim().ToLower();
+            string cacheKey = $"busqueda_categoria_{categoriaLimpia}_{terminoLimpio}";
+
+            var busquedaCache = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(busquedaCache))
+            {
+                var resultadosGuardados = JsonSerializer.Deserialize<IEnumerable<ProductoBusqueda>>(busquedaCache);
+                return Ok(resultadosGuardados);
             }
 
             var resultados = await _searchService.SearchByCategoryAsync(categoria, keyword);
+
+            var opcionesCache = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+            
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(resultados), opcionesCache);
+
             return Ok(resultados);
         }
 

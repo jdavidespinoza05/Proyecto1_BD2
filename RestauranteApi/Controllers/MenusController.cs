@@ -13,6 +13,8 @@ nuevo, siempre verificamos que el restaurante asociado realmente exista.
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed; // <-- Librería de Caché
+using System.Text.Json; // <-- Para serializar a JSON
 using RestaurantesApi.Models;
 using RestaurantesApi.Repositories;
 
@@ -23,10 +25,12 @@ namespace RestaurantesApi.Controllers
     public class MenusController : ControllerBase
     {
         private readonly IMenuRepository _repository;
+        private readonly IDistributedCache _cache; 
 
-        public MenusController(IMenuRepository repository)
+        public MenusController(IMenuRepository repository, IDistributedCache cache)
         {
             _repository = repository;
+            _cache = cache; 
         }
 
         [HttpPost]
@@ -44,9 +48,23 @@ namespace RestaurantesApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Menu>> GetMenuDetails(int id)
         {
+            string cacheKey = $"menu_detalle_{id}";
+
+            var menuCache = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(menuCache))
+            {
+                var menuGuardado = JsonSerializer.Deserialize<Menu>(menuCache);
+                return Ok(menuGuardado);
+            }
+
             var menu = await _repository.GetByIdAsync(id);
             if (menu == null) return NotFound("Ese plato no se encuentra en el menú.");
             
+            var opcionesCache = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+            
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(menu), opcionesCache);
+
             return menu;
         }
 
@@ -59,6 +77,8 @@ namespace RestaurantesApi.Controllers
             try
             {
                 await _repository.UpdateAsync(menu);
+
+                await _cache.RemoveAsync($"menu_detalle_{id}");
             }
             catch (Exception)
             {
@@ -77,6 +97,8 @@ namespace RestaurantesApi.Controllers
             if (menu == null) return NotFound();
 
             await _repository.DeleteAsync(id);
+
+            await _cache.RemoveAsync($"menu_detalle_{id}");
 
             return NoContent();
         }
