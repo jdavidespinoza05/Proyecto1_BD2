@@ -168,6 +168,21 @@ services:
     networks:
       - restaurante_net
 
+  neo4j:
+    image: neo4j:5.26.26-community
+    container_name: neo4j_restaurante
+    environment:
+      NEO4J_AUTH: neo4j/restaurante123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./analytics/data/csv:/var/lib/neo4j/import
+      - ./neo4j/cypher:/var/lib/neo4j/cypher
+    networks:
+      - restaurante_net
 # =====================================================================
 # SERVICIOS PROYECTO 2: INFRAESTRUCTURA OLAP Y ORQUESTACIÓN (TU SECCIÓN)
 # =====================================================================
@@ -292,6 +307,8 @@ volumes:
   mongo_shard_1c_data:
   elasticsearch_data:
   airflow_db_data: # NUEVO
+  neo4j_data:
+  neo4j_logs:
 
 networks:
   restaurante_net:
