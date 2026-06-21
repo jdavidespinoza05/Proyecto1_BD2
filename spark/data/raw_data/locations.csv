@@ -1,0 +1,21 @@
+﻿id,name,province,canton,district,latitude,longitude,location_type
+1,Cartago Centro,Cartago,Cartago,Oriental,9.8644,-83.9194,restaurant
+2,San Pedro Centro,San José,Montes de Oca,San Pedro,9.9281,-84.0507,restaurant
+3,Heredia Centro,Heredia,Heredia,Heredia,9.998,-84.1165,restaurant
+4,Alajuela Centro,Alajuela,Alajuela,Alajuela,10.0163,-84.2116,restaurant
+5,Escazú Centro,San José,Escazú,Escazú,9.9197,-84.1398,restaurant
+101,Tres Ríos,Cartago,La Unión,Tres Ríos,9.9064,-83.9876,customer
+102,Curridabat Centro,San José,Curridabat,Curridabat,9.9118,-84.0341,customer
+103,Guadalupe Centro,San José,Goicoechea,Guadalupe,9.9466,-84.0556,customer
+104,Sabanilla,San José,Montes de Oca,Sabanilla,9.945,-84.039,customer
+105,San Rafael de Heredia,Heredia,San Rafael,San Rafael,10.0135,-84.1001,customer
+106,Belén,Heredia,Belén,San Antonio,9.9795,-84.1882,customer
+107,Desamparados Centro,San José,Desamparados,Desamparados,9.8967,-84.0627,customer
+108,Paraíso Centro,Cartago,Paraíso,Paraíso,9.8383,-83.8656,customer
+109,El Tejar,Cartago,El Guarco,El Tejar,9.8479,-83.9391,customer
+110,Moravia Centro,San José,Moravia,San Vicente,9.9616,-84.0474,customer
+111,San Ramón Centro,Alajuela,San Ramón,San Ramón,10.0872,-84.4702,customer
+112,Grecia Centro,Alajuela,Grecia,Grecia,10.073,-84.3127,customer
+113,La Sabana,San José,San José,Mata Redonda,9.935,-84.1088,customer
+114,Santa Ana Centro,San José,Santa Ana,Santa Ana,9.9326,-84.1827,customer
+115,San Pablo de Heredia,Heredia,San Pablo,San Pablo,9.9957,-84.0966,customer
