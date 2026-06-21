@@ -279,6 +279,16 @@ services:
     networks:
       - restaurante_net
 
+  metabase:
+    image: metabase/metabase:latest
+    container_name: dashboard_metabase
+    ports:
+      - "3000:3000"
+    networks:
+      - restaurante_net
+    depends_on:
+      - spark_master
+
 # =====================================================================
 # ACTUALIZACIÓN DE VOLÚMENES
 # =====================================================================
@@ -292,6 +302,7 @@ volumes:
   mongo_shard_1c_data:
   elasticsearch_data:
   airflow_db_data: # NUEVO
+  metabase-data:
 
 networks:
   restaurante_net:
