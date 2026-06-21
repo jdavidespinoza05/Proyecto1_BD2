@@ -294,6 +294,16 @@ services:
     networks:
       - restaurante_net
 
+  metabase:
+    image: metabase/metabase:latest
+    container_name: dashboard_metabase
+    ports:
+      - "3000:3000"
+    networks:
+      - restaurante_net
+    depends_on:
+      - spark_master
+
 # =====================================================================
 # ACTUALIZACIÓN DE VOLÚMENES
 # =====================================================================
@@ -309,6 +319,7 @@ volumes:
   airflow_db_data: # NUEVO
   neo4j_data:
   neo4j_logs:
+  metabase-data:
 
 networks:
   restaurante_net:
