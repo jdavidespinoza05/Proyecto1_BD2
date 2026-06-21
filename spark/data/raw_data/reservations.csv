@@ -1,1 +1,1 @@
-id,user_id,restaurant_id,reservation_date,status
+id,user_id,restaurant_id,reservation_date,status,party_size

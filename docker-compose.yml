@@ -179,7 +179,7 @@ services:
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
-      - ./analytics/data/csv:/var/lib/neo4j/import
+      - ./spark/data/raw_data:/import:ro
       - ./neo4j/cypher:/var/lib/neo4j/cypher
     networks:
       - restaurante_net

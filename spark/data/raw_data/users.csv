@@ -1,2 +1,2 @@
-id,keycloak_id,name,email,role
+id,keycloak_id,name,email,role,location_id
 1,string,string,string,string
