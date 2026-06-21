@@ -1,2 +1,16 @@
-id,keycloak_id,name,email,role,location_id
-1,string,string,string,string
+﻿id,keycloak_id,name,email,role,location_id
+1,kc-user-001,Ana Rodríguez,ana.rodriguez@example.com,cliente,101
+2,kc-user-002,Carlos Méndez,carlos.mendez@example.com,cliente,102
+3,kc-user-003,María Vargas,maria.vargas@example.com,cliente,103
+4,kc-user-004,José Ramírez,jose.ramirez@example.com,cliente,104
+5,kc-user-005,Lucía Fernández,lucia.fernandez@example.com,cliente,105
+6,kc-user-006,Andrés Soto,andres.soto@example.com,cliente,106
+7,kc-user-007,Sofía Jiménez,sofia.jimenez@example.com,cliente,107
+8,kc-user-008,Diego Mora,diego.mora@example.com,cliente,108
+9,kc-user-009,Valentina Castro,valentina.castro@example.com,cliente,109
+10,kc-user-010,Daniel Herrera,daniel.herrera@example.com,cliente,110
+11,kc-user-011,Gabriela Rojas,gabriela.rojas@example.com,cliente,111
+12,kc-user-012,Sebastián Arias,sebastian.arias@example.com,cliente,112
+13,kc-user-013,Camila Salas,camila.salas@example.com,cliente,113
+14,kc-user-014,Mateo Quesada,mateo.quesada@example.com,cliente,114
+15,kc-user-015,Natalia Villalobos,natalia.villalobos@example.com,cliente,115

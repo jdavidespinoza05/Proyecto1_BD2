@@ -1,2 +1,6 @@
-id,name,address,phone,location_id
-1,McD,cartago,44446767
+﻿id,name,address,phone,location_id
+1,Sabores de Cartago,"Avenida 2, Cartago Centro",2551-1001,1
+2,Urbano Bistro,"San Pedro, Montes de Oca",2280-2002,2
+3,Café Herediano,Heredia Centro,2260-3003,3
+4,Sazón Alajuelense,Alajuela Centro,2430-4004,4
+5,Terraza Escazú,Escazú Centro,2228-5005,5
