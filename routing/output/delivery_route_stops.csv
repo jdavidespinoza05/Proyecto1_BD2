@@ -1,0 +1,25 @@
+﻿route_id,driver_id,driver_name,stop_sequence,stop_type,origin_location_id,origin_location_name,destination_location_id,destination_location_name,order_ids,orders_count,leg_distance_km,leg_estimated_minutes,cumulative_distance_km,cumulative_estimated_minutes,path_location_ids,path_location_names
+1,1,Valeria Campos,1,DELIVERY,3,Heredia Centro,106,Belén,18|138|258|378|498,5,9.58,19,9.58,19,3|106,Heredia Centro -> Belén
+1,1,Valeria Campos,2,DELIVERY,106,Belén,101,Tres Ríos,58|178|298|418,4,30.23,61,39.81,80,106|5|107|101,Belén -> Escazú Centro -> Desamparados Centro -> Tres Ríos
+1,1,Valeria Campos,3,DELIVERY,101,Tres Ríos,111,San Ramón Centro,98|218|338|458,4,68.09,129,107.9,209,101|2|113|114|111,Tres Ríos -> San Pedro Centro -> La Sabana -> Santa Ana Centro -> San Ramón Centro
+1,1,Valeria Campos,4,RETURN,111,San Ramón Centro,3,Heredia Centro,,0,47.2,86,155.1,295,111|4|3,San Ramón Centro -> Alajuela Centro -> Heredia Centro
+2,2,Luis Chaves,1,DELIVERY,3,Heredia Centro,106,Belén,78|198|318|438,4,9.58,19,9.58,19,3|106,Heredia Centro -> Belén
+2,2,Luis Chaves,2,DELIVERY,106,Belén,101,Tres Ríos,118|238|358|478,4,30.23,61,39.81,80,106|5|107|101,Belén -> Escazú Centro -> Desamparados Centro -> Tres Ríos
+2,2,Luis Chaves,3,DELIVERY,101,Tres Ríos,111,San Ramón Centro,38|158|278|398,4,68.09,129,107.9,209,101|2|113|114|111,Tres Ríos -> San Pedro Centro -> La Sabana -> Santa Ana Centro -> San Ramón Centro
+2,2,Luis Chaves,4,RETURN,111,San Ramón Centro,3,Heredia Centro,,0,47.2,86,155.1,295,111|4|3,San Ramón Centro -> Alajuela Centro -> Heredia Centro
+3,3,Andrea Solano,1,DELIVERY,4,Alajuela Centro,113,La Sabana,19|139|259|379|499,5,20.21,44,20.21,44,4|106|5|113,Alajuela Centro -> Belén -> Escazú Centro -> La Sabana
+3,3,Andrea Solano,2,DELIVERY,113,La Sabana,103,Guadalupe Centro,99|219|339|459,4,7.04,15,27.25,59,113|103,La Sabana -> Guadalupe Centro
+3,3,Andrea Solano,3,DELIVERY,103,Guadalupe Centro,108,Paraíso Centro,59|179|299|419,4,28.64,58,55.89,117,103|104|101|108,Guadalupe Centro -> Sabanilla -> Tres Ríos -> Paraíso Centro
+3,3,Andrea Solano,4,RETURN,108,Paraíso Centro,4,Alajuela Centro,,0,51.79,105,107.68,222,108|101|104|110|115|3|4,Paraíso Centro -> Tres Ríos -> Sabanilla -> Moravia Centro -> San Pablo de Heredia -> Heredia Centro -> Alajuela Centro
+4,4,Marco Rojas,1,DELIVERY,4,Alajuela Centro,113,La Sabana,79|199|319|439,4,20.21,44,20.21,44,4|106|5|113,Alajuela Centro -> Belén -> Escazú Centro -> La Sabana
+4,4,Marco Rojas,2,DELIVERY,113,La Sabana,103,Guadalupe Centro,39|159|279|399,4,7.04,15,27.25,59,113|103,La Sabana -> Guadalupe Centro
+4,4,Marco Rojas,3,DELIVERY,103,Guadalupe Centro,108,Paraíso Centro,119|239|359|479,4,28.64,58,55.89,117,103|104|101|108,Guadalupe Centro -> Sabanilla -> Tres Ríos -> Paraíso Centro
+4,4,Marco Rojas,4,RETURN,108,Paraíso Centro,4,Alajuela Centro,,0,51.79,105,107.68,222,108|101|104|110|115|3|4,Paraíso Centro -> Tres Ríos -> Sabanilla -> Moravia Centro -> San Pablo de Heredia -> Heredia Centro -> Alajuela Centro
+5,5,Daniela Vega,1,DELIVERY,5,Escazú Centro,115,San Pablo de Heredia,60|180|300|420,4,12.6,28,12.6,28,5|113|115,Escazú Centro -> La Sabana -> San Pablo de Heredia
+5,5,Daniela Vega,2,DELIVERY,115,San Pablo de Heredia,105,San Rafael de Heredia,20|140|260|380|500,5,2.38,7,14.98,35,115|105,San Pablo de Heredia -> San Rafael de Heredia
+5,5,Daniela Vega,3,DELIVERY,105,San Rafael de Heredia,110,Moravia Centro,100|220|340|460,4,9.63,20,24.61,55,105|110,San Rafael de Heredia -> Moravia Centro
+5,5,Daniela Vega,4,RETURN,110,Moravia Centro,5,Escazú Centro,,0,13.76,33,38.37,88,110|103|113|5,Moravia Centro -> Guadalupe Centro -> La Sabana -> Escazú Centro
+6,6,Felipe Mora,1,DELIVERY,5,Escazú Centro,115,San Pablo de Heredia,120|240|360|480,4,12.6,28,12.6,28,5|113|115,Escazú Centro -> La Sabana -> San Pablo de Heredia
+6,6,Felipe Mora,2,DELIVERY,115,San Pablo de Heredia,105,San Rafael de Heredia,80|200|320|440,4,2.38,7,14.98,35,115|105,San Pablo de Heredia -> San Rafael de Heredia
+6,6,Felipe Mora,3,DELIVERY,105,San Rafael de Heredia,110,Moravia Centro,40|160|280|400,4,9.63,20,24.61,55,105|110,San Rafael de Heredia -> Moravia Centro
+6,6,Felipe Mora,4,RETURN,110,Moravia Centro,5,Escazú Centro,,0,13.76,33,38.37,88,110|103|113|5,Moravia Centro -> Guadalupe Centro -> La Sabana -> Escazú Centro

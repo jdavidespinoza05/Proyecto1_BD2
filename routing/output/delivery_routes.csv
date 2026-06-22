@@ -1,0 +1,7 @@
+﻿route_id,driver_id,driver_name,restaurant_id,start_location_id,start_location_name,delivery_stops,total_orders,baseline_distance_km,baseline_estimated_minutes,optimized_distance_km,optimized_estimated_minutes,distance_saved_km,improvement_percentage,return_to_start,algorithm
+1,1,Valeria Campos,3,3,Heredia Centro,3,13,568.76,1078,155.1,295,413.66,72.73,True,Nearest Neighbor + Dijkstra
+2,2,Luis Chaves,3,3,Heredia Centro,3,12,549.85,1044,155.1,295,394.75,71.79,True,Nearest Neighbor + Dijkstra
+3,3,Andrea Solano,4,4,Alajuela Centro,3,13,320.46,652,107.68,222,212.78,66.4,True,Nearest Neighbor + Dijkstra
+4,4,Marco Rojas,4,4,Alajuela Centro,3,12,328.31,665,107.68,222,220.63,67.2,True,Nearest Neighbor + Dijkstra
+5,5,Daniela Vega,5,5,Escazú Centro,3,13,108.8,236,38.37,88,70.43,64.73,True,Nearest Neighbor + Dijkstra
+6,6,Felipe Mora,5,5,Escazú Centro,3,12,97.71,217,38.37,88,59.34,60.73,True,Nearest Neighbor + Dijkstra

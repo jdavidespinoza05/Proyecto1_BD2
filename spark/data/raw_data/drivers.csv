@@ -1,1 +1,7 @@
-id,name,capacity,start_location_id,active
+﻿id,name,capacity,restaurant_id,start_location_id,active
+1,Valeria Campos,13,3,3,True
+2,Luis Chaves,13,3,3,True
+3,Andrea Solano,13,4,4,True
+4,Marco Rojas,13,4,4,True
+5,Daniela Vega,13,5,5,True
+6,Felipe Mora,13,5,5,True
