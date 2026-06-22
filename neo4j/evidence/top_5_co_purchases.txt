@@ -1,0 +1,6 @@
+﻿product1, product2, purchasesTogether
+"Hamburguesa urbana", "Papas r├║sticas", 51
+"Caf├® chorreado", "Cheesecake de caf├®", 51
+"Casado tradicional", "Refresco natural", 43
+"Pollo a la plancha", "Batido de mora", 43
+"Chifrijo", "Refresco natural", 41
