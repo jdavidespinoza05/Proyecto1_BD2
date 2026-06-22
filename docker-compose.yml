@@ -294,15 +294,44 @@ services:
     networks:
       - restaurante_net
 
+  postgres_analytics:
+    image: postgres:16
+    container_name: postgres_analytics
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics_password
+      POSTGRES_DB: analytics_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - analytics_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U analytics -d analytics_db"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - restaurante_net
+      
   metabase:
     image: metabase/metabase:latest
     container_name: dashboard_metabase
+    environment:
+      MB_DB_TYPE: h2
+      MB_DB_FILE: /metabase-data/metabase.db
     ports:
       - "3000:3000"
+    volumes:
+      - metabase-data:/metabase-data
+    depends_on:
+      postgres_analytics:
+        condition: service_healthy
     networks:
       - restaurante_net
-    depends_on:
-      - spark_master
 
 # =====================================================================
 # ACTUALIZACIÓN DE VOLÚMENES
@@ -320,6 +349,7 @@ volumes:
   neo4j_data:
   neo4j_logs:
   metabase-data:
+  analytics_db_data:
 
 networks:
   restaurante_net:
