@@ -1,0 +1,2 @@
+﻿route, totalHops, totalDistanceKm, totalEstimatedMinutes
+["Cartago Centro", "Tres R├¡os", "Desamparados Centro", "Escaz├║ Centro", "Bel├®n", "San Ram├│n Centro"], 5, 79.71, 152
