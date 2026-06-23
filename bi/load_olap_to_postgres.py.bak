@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -39,7 +39,7 @@ CUBE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "cantidad_pedidos",
         ],
         "create_sql": """
-            CREATE TABLE spark_olap.cubo_tiempo (
+            CREATE TABLE olap.cubo_tiempo (
                 anio INTEGER,
                 mes INTEGER,
                 ingresos_totales NUMERIC(18, 2),
@@ -55,7 +55,7 @@ CUBE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "volumen_pedidos",
         ],
         "create_sql": """
-            CREATE TABLE spark_olap.cubo_ubicacion (
+            CREATE TABLE olap.cubo_ubicacion (
                 nombre_restaurante TEXT,
                 direccion TEXT,
                 ingresos NUMERIC(18, 2),
@@ -70,7 +70,7 @@ CUBE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "gasto_total",
         ],
         "create_sql": """
-            CREATE TABLE spark_olap.cubo_frecuencia (
+            CREATE TABLE olap.cubo_frecuencia (
                 id_usuario INTEGER,
                 total_pedidos_historico BIGINT,
                 gasto_total NUMERIC(18, 2)
@@ -84,7 +84,7 @@ CUBE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "trafico_pedidos",
         ],
         "create_sql": """
-            CREATE TABLE spark_olap.cubo_horarios (
+            CREATE TABLE olap.cubo_horarios (
                 dia_semana INTEGER,
                 hora_dia INTEGER,
                 trafico_pedidos BIGINT
@@ -98,7 +98,7 @@ CUBE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "monto_involucrado",
         ],
         "create_sql": """
-            CREATE TABLE spark_olap.cubo_estado (
+            CREATE TABLE olap.cubo_estado (
                 estado TEXT,
                 total_pedidos BIGINT,
                 monto_involucrado NUMERIC(18, 2)
@@ -171,7 +171,7 @@ def insert_cube(
 
     cursor.execute(
         f"DROP TABLE IF EXISTS "
-        f"spark_olap.{cube_name} CASCADE"
+        f"olap.{cube_name} CASCADE"
     )
 
     cursor.execute(definition["create_sql"])
@@ -183,7 +183,7 @@ def insert_cube(
     )
 
     insert_sql = (
-        f"INSERT INTO spark_olap.{cube_name} "
+        f"INSERT INTO olap.{cube_name} "
         f"({column_list}) "
         f"VALUES ({placeholders})"
     )
@@ -204,7 +204,7 @@ def create_olap_views(
     cursor.execute(
         """
         CREATE OR REPLACE VIEW
-            spark_olap.v_ingresos_por_tiempo
+            olap.v_ingresos_por_tiempo
         AS
         SELECT
             anio,
@@ -212,41 +212,41 @@ def create_olap_views(
             make_date(anio, mes, 1) AS periodo,
             ingresos_totales,
             cantidad_pedidos
-        FROM spark_olap.cubo_tiempo
+        FROM olap.cubo_tiempo
         """
     )
 
     cursor.execute(
         """
         CREATE OR REPLACE VIEW
-            spark_olap.v_actividad_por_restaurante
+            olap.v_actividad_por_restaurante
         AS
         SELECT
             nombre_restaurante,
             direccion,
             ingresos,
             volumen_pedidos
-        FROM spark_olap.cubo_ubicacion
+        FROM olap.cubo_ubicacion
         """
     )
 
     cursor.execute(
         """
         CREATE OR REPLACE VIEW
-            spark_olap.v_frecuencia_clientes
+            olap.v_frecuencia_clientes
         AS
         SELECT
             id_usuario,
             total_pedidos_historico,
             gasto_total
-        FROM spark_olap.cubo_frecuencia
+        FROM olap.cubo_frecuencia
         """
     )
 
     cursor.execute(
         """
         CREATE OR REPLACE VIEW
-            spark_olap.v_horarios_pico
+            olap.v_horarios_pico
         AS
         SELECT
             dia_semana,
@@ -254,27 +254,27 @@ def create_olap_views(
                 WHEN 1 THEN 'Domingo'
                 WHEN 2 THEN 'Lunes'
                 WHEN 3 THEN 'Martes'
-                WHEN 4 THEN 'MiÃ©rcoles'
+                WHEN 4 THEN 'Miércoles'
                 WHEN 5 THEN 'Jueves'
                 WHEN 6 THEN 'Viernes'
-                WHEN 7 THEN 'SÃ¡bado'
+                WHEN 7 THEN 'Sábado'
             END AS nombre_dia,
             hora_dia,
             trafico_pedidos
-        FROM spark_olap.cubo_horarios
+        FROM olap.cubo_horarios
         """
     )
 
     cursor.execute(
         """
         CREATE OR REPLACE VIEW
-            spark_olap.v_estado_pedidos
+            olap.v_estado_pedidos
         AS
         SELECT
             estado,
             total_pedidos,
             monto_involucrado
-        FROM spark_olap.cubo_estado
+        FROM olap.cubo_estado
         """
     )
 
@@ -287,7 +287,7 @@ def validate_loaded_data(
         cursor.execute(
             f"""
             SELECT count(*)
-            FROM spark_olap.{cube_name}
+            FROM olap.{cube_name}
             """
         )
 
@@ -301,12 +301,12 @@ def validate_loaded_data(
 
         if total_rows <= 0:
             raise ValueError(
-                f"La tabla spark_olap.{cube_name} "
-                "quedÃ³ vacÃ­a."
+                f"La tabla olap.{cube_name} "
+                "quedó vacía."
             )
 
         print(
-            f"- spark_olap.{cube_name}: "
+            f"- olap.{cube_name}: "
             f"{total_rows} registros"
         )
 
@@ -325,18 +325,18 @@ def main() -> None:
 
         print(
             f"- {cube_name}: "
-            f"{len(records)} registros leÃ­dos"
+            f"{len(records)} registros leídos"
         )
 
     print()
-    print("Conectando con PostgreSQL analÃ­tico...")
+    print("Conectando con PostgreSQL analítico...")
 
     with psycopg.connect(
         **DATABASE_CONFIG
     ) as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                "CREATE SCHEMA IF NOT EXISTS spark_olap"
+                "CREATE SCHEMA IF NOT EXISTS olap"
             )
 
             for cube_name, records in (
@@ -364,7 +364,7 @@ def main() -> None:
     )
 
     print(
-        "Metabase ya puede consultar el esquema spark_olap."
+        "Metabase ya puede consultar el esquema olap."
     )
 
 

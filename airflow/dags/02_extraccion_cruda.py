@@ -14,6 +14,11 @@ def extraer_tabla_a_csv(tabla, ruta_salida):
     cursor.execute(f"SELECT * FROM {tabla};")
     resultados = cursor.fetchall()
     columnas = [desc[0] for desc in cursor.description]
+    if not resultados:
+        raise ValueError(
+            f"La tabla {tabla} no contiene registros. "
+            "No se generará un CSV vacío."
+        )
     os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
     with open(ruta_salida, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
@@ -24,14 +29,28 @@ def extraer_tabla_a_csv(tabla, ruta_salida):
     conn.close()
 
 def orquestar_extraccion():
-    ruta_base = '/opt/airflow/dags/raw_data'
+    ruta_base = '/opt/airflow/data/postgres_extract'
     tablas_a_extraer = ['users', 'restaurants', 'menus', 'reservations', 'orders']
+    errores = []
+
     for tabla in tablas_a_extraer:
         ruta_archivo = f"{ruta_base}/{tabla}.csv"
+
         try:
-            extraer_tabla_a_csv(tabla, ruta_archivo)
-        except Exception as e:
-            print(f"Error extrayendo {tabla}. Detalle: {e}")
+            extraer_tabla_a_csv(
+                tabla,
+                ruta_archivo,
+            )
+        except Exception as error:
+            errores.append(
+                f"{tabla}: {error}"
+            )
+
+    if errores:
+        raise RuntimeError(
+            "La extracción no pudo completarse:\n"
+            + "\n".join(errores)
+        )
 
 # Funciones de integración para cumplir con la rúbrica
 def trigger_reindexado_elasticsearch():

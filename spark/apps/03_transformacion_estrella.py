@@ -10,9 +10,9 @@ spark.sparkContext.setLogLevel("WARN")
 print("Iniciando procesamiento de Big Data con Apache Spark...")
 
 # 2. Definir las rutas 
-ruta_cruda = "/opt/bitnami/spark/data/raw_data/"
-ruta_warehouse = "/opt/bitnami/spark/data/warehouse/"
-ruta_cubos = "/opt/bitnami/spark/data/cubos_olap/"
+ruta_cruda = "/opt/spark/data/raw_data/"
+ruta_warehouse = "/opt/spark/data/warehouse/"
+ruta_cubos = "/opt/spark/data/cubos_olap/"
 
 # 3. Cargar los datos crudos
 print("Cargando archivos CSV...")
