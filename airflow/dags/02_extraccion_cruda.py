@@ -11,22 +11,30 @@ def extraer_tabla_a_csv(tabla, ruta_salida):
     hook = PostgresHook(postgres_conn_id='postgres_api_db')
     conn = hook.get_conn()
     cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM {tabla};")
-    resultados = cursor.fetchall()
-    columnas = [desc[0] for desc in cursor.description]
-    if not resultados:
-        raise ValueError(
-            f"La tabla {tabla} no contiene registros. "
-            "No se generará un CSV vacío."
-        )
-    os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
-    with open(ruta_salida, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(columnas)
-        writer.writerows(resultados)
-    print(f"Éxito: {len(resultados)} registros guardados en {ruta_salida}")
-    cursor.close()
-    conn.close()
+    
+    try:
+        cursor.execute(f"SELECT * FROM {tabla};")
+        resultados = cursor.fetchall()
+        columnas = [desc[0] for desc in cursor.description]
+        
+        # EL ARREGLO: Si está vacío, solo avisa, pero NO detengas (no hacemos 'raise')
+        if not resultados:
+            print(f"Advertencia: La tabla {tabla} está vacía. Saltando creación de CSV.")
+            return # Salimos pacíficamente de la función
+            
+        os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
+        with open(ruta_salida, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(columnas)
+            writer.writerows(resultados)
+            
+        print(f"Éxito: {len(resultados)} registros guardados en {ruta_salida}")
+    except Exception as e:
+        print(f"Error con la tabla {tabla}: {e}")
+        raise e # Solo fallamos si de verdad hay un error crítico de conexión
+    finally:
+        cursor.close()
+        conn.close()
 
 def orquestar_extraccion():
     ruta_base = '/opt/airflow/data/postgres_extract'
